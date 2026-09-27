@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cascadia External Welfare Platform | 卡斯卡迪亞學生福利平台</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#134e4a',
+            },
+            accent: {
+              500: '#f59e0b',
+              600: '#d97706',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'PingFang HK', 'Microsoft JhengHei', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet CSS & JS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    /* Custom Leaflet Styling */
+    #map {
+      width: 100%;
+      height: calc(100vh - 180px);
+      min-height: 450px;
+      border-radius: 0.75rem;
+      z-index: 10;
+    }
+    .leaflet-popup-content-wrapper {
+      border-radius: 0.75rem;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .leaflet-popup-content {
+      margin: 0 !important;
+      width: 280px !important;
+    }
+    /* Hide scrollbar for category tabs */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Brand Logo & Title -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('list')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20 font-bold text-xl">
+            C
+          </div>
+          <div>
+            <h1 class="font-bold text-lg leading-tight tracking-tight text-slate-900 dark:text-white">
+              CASCADIA <span class="text-brand-600 dark:text-brand-400 font-medium text-sm">Welfare</span>
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400" id="header-sub">HKUGAC Student Welfare Platform</p>
+          </div>
+        </div>
+
+        <!-- Right Side Controls -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          <!-- View Switcher (List / Map) -->
+          <div class="bg-slate-100 dark:bg-slate-700 p-1 rounded-xl flex items-center border border-slate-200 dark:border-slate-600">
+            <button id="btn-view-list" onclick="switchView('list')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm">
+              <i class="fa-solid fa-list-ul"></i>
+              <span class="hidden sm:inline" data-i18n="viewList">List</span>
+            </button>
+            <button id="btn-view-map" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 text-slate-600 dark:text-slate-300 hover:text-brand-600">
+              <i class="fa-solid fa-map-location-dot"></i>
+              <span class="hidden sm:inline" data-i18n="viewMap">Map</span>
+            </button>
+          </div>
+
+          <!-- Language Switcher -->
+          <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center space-x-1.5 shadow-sm">
+            <i class="fa-solid fa-globe text-brand-500"></i>
+            <span id="lang-indicator">繁體中文</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Hero / Welcome Banner -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-700 via-brand-600 to-teal-600 p-6 sm:p-8 text-white shadow-xl shadow-brand-900/10">
+      <div class="relative z-10 max-w-2xl">
+        <span class="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold text-white mb-2" data-i18n="heroBadge">
+          Official Student Welfare 2026
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2" id="hero-title">
+          Cascadia External Welfare Discounts
+        </h2>
+        <p class="text-sm sm:text-base text-brand-100 leading-relaxed" id="hero-desc">
+          Present your HKUGAC Student ID card at participating stores or use exclusive promo codes online to enjoy special student discounts across Hong Kong!
+        </p>
+      </div>
+      <!-- Decorative Background Elements -->
+      <i class="fa-solid fa-graduation-cap absolute -right-4 -bottom-6 text-9xl text-white/10 transform -rotate-12 pointer-events-none"></i>
+    </div>
+
+    <!-- Filter & Search Controls Bar -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
+      
+      <!-- Top Row: Search input + Physical/Online Toggle -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <!-- Search Bar -->
+        <div class="relative flex-grow">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input 
+            type="text" 
+            id="search-input" 
+            oninput="handleSearchInput()" 
+            placeholder="Search stores, discounts, or locations..." 
+            class="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition"
+          />
+          <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm">
+            <i class="fa-solid fa-circle-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Store Type Sub-Tabs (Physical vs Online) -->
+        <div id="store-type-selector" class="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700 self-start sm:self-auto shrink-0">
+          <button id="tab-type-physical" onclick="setStoreType('physical')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center space-x-1.5">
+            <i class="fa-solid fa-store"></i>
+            <span data-i18n="typePhysical">Physical Stores</span>
+            <span id="badge-physical-count" class="ml-1 text-[10px] bg-brand-100 text-brand-800 px-1.5 py-0.5 rounded-full font-bold">0</span>
+          </button>
+          <button id="tab-type-online" onclick="setStoreType('online')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-brand-600 flex items-center space-x-1.5">
+            <i class="fa-solid fa-globe"></i>
+            <span data-i18n="typeOnline">Online Stores</span>
+            <span id="badge-online-count" class="ml-1 text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded-full font-bold">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Row: Category Chips & Favorites Filter -->
+      <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/50">
+        <!-- Scrollable Category Pill List -->
+        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1 pr-2 text-xs" id="category-container">
+          <!-- Categories populated via JS -->
+        </div>
+
+        <!-- Favorites Toggle -->
+        <button id="btn-fav-filter" onclick="toggleFavoritesFilter()" class="shrink-0 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-amber-400 text-xs font-medium flex items-center space-x-1.5 transition">
+          <i class="fa-solid fa-bookmark text-slate-400" id="fav-icon"></i>
+          <span data-i18n="savedOnly">Saved</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- View 1: List View Grid -->
+    <div id="view-list" class="space-y-4">
+      <!-- Active Filters Bar & Count -->
+      <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
+        <div id="results-count">Showing 0 discounts</div>
+        <div id="live-status" class="flex items-center space-x-1.5 text-emerald-600 dark:text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span data-i18n="cloudConnected">Cloudflare D1 Sync Active</span>
+        </div>
+      </div>
+
+      <!-- Store Cards Grid -->
+      <div id="store-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 text-2xl">
+          <i class="fa-solid fa-store-slash"></i>
+        </div>
+        <h3 class="font-bold text-slate-700 dark:text-slate-200 mb-1" data-i18n="noResultsTitle">No Welfare Discounts Found</h3>
+        <p class="text-xs text-slate-500 max-w-sm mx-auto" data-i18n="noResultsDesc">Try clearing your search keyword or switching categories.</p>
+        <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-semibold hover:bg-brand-700 transition" data-i18n="resetFilters">
+          Reset All Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- View 2: Leaflet Map View -->
+    <div id="view-map" class="hidden space-y-4">
+      <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex items-center space-x-2 text-slate-600 dark:text-slate-300">
+          <i class="fa-solid fa-location-dot text-brand-600"></i>
+          <span data-i18n="mapGuide">Click on any store pin to inspect details and student discount terms.</span>
+        </div>
+        <button onclick="recenterMap()" class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-200 transition font-medium">
+          <i class="fa-solid fa-crosshairs mr-1"></i> <span data-i18n="recenterMap">Center Hong Kong</span>
+        </button>
+      </div>
+
+      <!-- Leaflet Canvas -->
+      <div id="map" class="shadow-md border border-slate-200 dark:border-slate-700"></div>
+    </div>
+
+  </main>
+
+  <!-- Store Detail Modal -->
+  <div id="detail-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700 transform transition-all duration-300">
+      
+      <!-- Modal Header -->
+      <div class="relative p-6 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+        <button onclick="closeModal()" class="absolute top-4 right-4 w-9 h-9 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white shadow-sm transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+        
+        <div class="flex items-center space-x-2 mb-2">
+          <span id="modal-category" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-100 dark:bg-brand-900/40 text-brand-800 dark:text-brand-300">
+            Category
+          </span>
+          <span id="modal-type" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+            Physical Store
+          </span>
+        </div>
+
+        <h3 id="modal-brand-primary" class="text-xl font-extrabold text-slate-900 dark:text-white leading-tight">
+          Brand Name
+        </h3>
+        <p id="modal-brand-secondary" class="text-sm font-medium text-slate-500 dark:text-slate-400">
+          Secondary Name
+        </p>
+      </div>
+
+      <!-- Modal Content Body -->
+      <div class="p-6 space-y-6">
+
+        <!-- Discount Highlight Banner -->
+        <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-l-4 border-amber-500 p-4 rounded-r-xl">
+          <div class="flex items-start space-x-3">
+            <i class="fa-solid fa-tags text-amber-500 text-lg mt-0.5"></i>
+            <div>
+              <h4 class="font-bold text-amber-900 dark:text-amber-300 text-xs uppercase tracking-wider mb-1" data-i18n="discountDetails">
+                Student Welfare Privilege
+              </h4>
+              <p id="modal-discount" class="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed">
+                Discount text here
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Business Specifics Grid -->
+        <div class="grid grid-cols-1 gap-4 text-sm">
+
+          <!-- Address (If Physical) -->
+          <div id="modal-row-address" class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0 text-brand-600 dark:text-brand-400">
+              <i class="fa-solid fa-map-pin"></i>
+            </div>
+            <div class="flex-grow">
+              <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide" data-i18n="addressLabel">Address</div>
+              <div id="modal-address" class="text-slate-700 dark:text-slate-200 font-medium">--</div>
+              <a id="modal-maps-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center text-xs font-semibold text-brand-600 hover:text-brand-700 mt-1">
+                <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> <span data-i18n="openGoogleMaps">Open in Google Maps</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Opening Hours (If Physical) -->
+          <div id="modal-row-hours" class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0 text-brand-600 dark:text-brand-400">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide" data-i18n="hoursLabel">Opening Hours</div>
+              <div id="modal-hours" class="text-slate-700 dark:text-slate-200 font-medium">--</div>
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div id="modal-row-phone" class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0 text-brand-600 dark:text-brand-400">
+              <i class="fa-solid fa-phone"></i>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide" data-i18n="phoneLabel">Phone / Contact Number</div>
+              <a id="modal-phone" href="#" class="text-slate-800 dark:text-slate-100 font-semibold hover:underline">--</a>
+            </div>
+          </div>
+
+          <!-- Main Contact & Links -->
+          <div id="modal-row-contact" class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0 text-brand-600 dark:text-brand-400">
+              <i class="fa-solid fa-envelope"></i>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide" data-i18n="contactLabel">Contact Info</div>
+              <div id="modal-contact" class="text-slate-700 dark:text-slate-200 font-medium">--</div>
+            </div>
+          </div>
+
+          <!-- Official Links -->
+          <div id="modal-row-links" class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0 text-brand-600 dark:text-brand-400">
+              <i class="fa-solid fa-link"></i>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide" data-i18n="linksLabel">Official Website / Promo Link</div>
+              <a id="modal-links" href="#" target="_blank" rel="noopener noreferrer" class="text-brand-600 hover:underline font-medium break-all">--</a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div class="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+        <button id="modal-fav-btn" onclick="toggleCurrentModalFavorite()" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center space-x-1.5">
+          <i class="fa-regular fa-bookmark"></i>
+          <span data-i18n="saveToFavorites">Bookmark Welfare</span>
+        </button>
+
+        <button onclick="closeModal()" class="px-5 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 transition" data-i18n="close">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 mt-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 space-y-2">
+      <p class="font-semibold text-slate-600 dark:text-slate-400">
+        &copy; 2026 HKUGAC Cascadia Student Council. All Rights Reserved.
+      </p>
+      <p class="text-[11px] text-slate-400">
+        Powered by Cloudflare Worker D1 Database & Hosted on GitHub Pages.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    /* ==========================================================================
+       1. GLOBAL STATE & CONFIGURATION
+       ========================================================================== */
+    const WORKER_BASE_URL = 'https://cascadia-welfare.typhoonnerd.workers.dev';
+
+    // Application state
+    let state = {
+      lang: 'en', // 'en' | 'zh'
+      view: 'list', // 'list' | 'map'
+      storeType: 'physical', // 'physical' | 'online'
+      selectedCategory: 'ALL',
+      searchQuery: '',
+      favoritesOnly: false,
+      favorites: JSON.parse(localStorage.getItem('cascadia_favs') || '[]'),
+      
+      // Loaded raw data
+      physicalStores: [],
+      onlineStores: [],
+      
+      currentModalItem: null
+    };
+
+    // Dictionary for Localization
+    const i18n = {
+      en: {
+        headerSub: "HKUGAC Student Welfare Platform",
+        viewList: "List",
+        viewMap: "Map",
+        heroBadge: "Official Student Welfare 2026",
+        heroTitle: "Cascadia External Welfare Discounts",
+        heroDesc: "Present your HKUGAC Student ID card at participating stores or use exclusive promo codes online to enjoy special student discounts across Hong Kong!",
+        typePhysical: "Physical Stores",
+        typeOnline: "Online Stores",
+        savedOnly: "Saved",
+        cloudConnected: "Cloudflare D1 Sync Active",
+        discountDetails: "Student Welfare Privilege",
+        addressLabel: "Address",
+        hoursLabel: "Opening Hours",
+        phoneLabel: "Phone / Contact",
+        contactLabel: "Contact Info",
+        linksLabel: "Website / Links",
+        openGoogleMaps: "Open in Google Maps",
+        saveToFavorites: "Bookmark Welfare",
+        saved: "Bookmarked",
+        close: "Close",
+        allCategories: "All Categories",
+        viewDetails: "View Details",
+        noResultsTitle: "No Welfare Discounts Found",
+        noResultsDesc: "Try clearing your search keyword or switching categories.",
+        resetFilters: "Reset All Filters",
+        mapGuide: "Click on any store pin to inspect details and student discount terms.",
+        recenterMap: "Center Hong Kong",
+        showingCount: (count) => `Showing ${count} discount entry/entries`
+      },
+      zh: {
+        headerSub: "港島民生書院學生會 外部福利平台",
+        viewList: "列表檢視",
+        viewMap: "地圖檢視",
+        heroBadge: "2026 年度官方學生福利",
+        heroTitle: "卡斯卡迪亞 學生專享外部折扣",
+        heroDesc: "於指定實體分店出示有效學生證，或於網店結帳時輸入獨家優惠碼，即可享全港各界學生專享優惠！",
+        typePhysical: "實體店鋪",
+        typeOnline: "網上商店",
+        savedOnly: "已收藏",
+        cloudConnected: "已即時連線 Cloudflare D1 資料庫",
+        discountDetails: "學生專享福利詳情",
+        addressLabel: "分店地址",
+        hoursLabel: "營業時間",
+        phoneLabel: "聯絡電話",
+        contactLabel: "主要聯絡",
+        linksLabel: "官方網站 / 優惠連結",
+        openGoogleMaps: "於 Google 地圖開啟",
+        saveToFavorites: "收藏此福利",
+        saved: "已收藏",
+        close: "關閉",
+        allCategories: "所有分類",
+        viewDetails: "查看詳情",
+        noResultsTitle: "未有找到相關學生福利",
+        noResultsDesc: "請嘗試清除搜尋關鍵字，或切換其他分類標籤。",
+        resetFilters: "重置所有篩選",
+        mapGuide: "點擊地圖上的地標即可查看店舖營業資訊及學生優惠詳情。",
+        recenterMap: "重置地圖至香港",
+        showingCount: (count) => `顯示 ${count} 個福利項目`
+      }
+    };
+
+    /* ==========================================================================
+       2. MOCK DATA FALLBACK (In case Cloudflare API network error during preview)
+       ========================================================================== */
+    const mockPhysicalStores = [
+      {
+        location_id: 101,
+        brand_id: 1,
+        brand_en: "Pacific Coffee",
+        brand_zh: "太平洋咖啡",
+        category_en: "Food & Beverage",
+        category_zh: "餐飲美食",
+        main_contact: "enquiry@pacificcoffee.com",
+        other_links: "https://www.pacificcoffee.com",
+        discount_details_zh: "出示學生證購買任何手調飲品即可享 15% 折扣優惠 (全日適用)。",
+        discount_details_en: "Enjoy 15% discount on handcrafted beverages upon presenting valid Student ID.",
+        phone_number: "2521 1868",
+        address_zh: "中環皇后大道中16-18號新世界大廈地下",
+        address_en: "G/F, New World Tower, 16-18 Queen's Road Central, Central",
+        lat: 22.2815,
+        lng: 114.1578,
+        opening_hours_zh: "星期一至六: 07:30 - 20:00, 星期日: 09:00 - 18:00",
+        opening_hours_en: "Mon-Sat: 07:30 - 20:00, Sun: 09:00 - 18:00"
+      },
+      {
+        location_id: 102,
+        brand_id: 2,
+        brand_en: "Eslite Bookstore",
+        brand_zh: "誠品書店",
+        category_en: "Stationery & Books",
+        category_zh: "文具圖書",
+        main_contact: "service@eslite.com.hk",
+        other_links: "https://www.eslite.com",
+        discount_details_zh: "購買指定繁體中文書籍及文具精品滿 HK$200 即享 10% 折扣。",
+        discount_details_en: "10% off upon purchase of HK$200 on selected books and stationery.",
+        phone_number: "3419 6789",
+        address_zh: "銅鑼灣軒尼詩道500號希慎廣場8-10樓",
+        address_en: "8-10/F, Hysan Place, 500 Hennessy Road, Causeway Bay",
+        lat: 22.2799,
+        lng: 114.1837,
+        opening_hours_zh: "星期一至日: 10:00 - 22:00",
+        opening_hours_en: "Mon-Sun: 10:00 - 22:00"
+      },
+      {
+        location_id: 103,
+        brand_id: 3,
+        brand_en: "Fortress Tech",
+        brand_zh: "豐澤電器",
+        category_en: "Electronics",
+        category_zh: "數碼電子",
+        main_contact: "fortress@aswatson.com",
+        other_links: "https://www.fortress.com.hk",
+        discount_details_zh: "購買指定品牌手提電腦或平板電腦專享額外 5% 折扣，加送配件禮包。",
+        discount_details_en: "Extra 5% off on selected laptop/tablet models with free accessory bundle.",
+        phone_number: "2555 5788",
+        address_zh: "旺角彌敦道664號惠豐中心地下",
+        address_en: "G/F, Wai Fung Plaza, 664 Nathan Road, Mong Kok",
+        lat: 22.3193,
+        lng: 114.1694,
+        opening_hours_zh: "星期一至日: 11:00 - 21:30",
+        opening_hours_en: "Mon-Sun: 11:00 - 21:30"
+      }
+    ];
+
+    const mockOnlineStores = [
+      {
+        id: 201,
+        brand_en: "Klook Hong Kong",
+        brand_zh: "Klook 客路",
+        category_en: "Entertainment",
+        category_zh: "休閒娛樂",
+        main_contact: "support@klook.com",
+        other_links: "https://www.klook.com/zh-HK/",
+        phone_number: "2123 4567",
+        discount_details_zh: "結帳輸入推廣碼「CASCADIA2026」全站展覽、景點門票享 88 折優惠。",
+        discount_details_en: "Enter promo code [CASCADIA2026] at checkout for 12% off tickets & activities.",
+        created_at: "2026-01-01 00:00:00"
+      },
+      {
+        id: 202,
+        brand_en: "Adobe Student Creative Cloud",
+        brand_zh: "Adobe 學生創意雲端",
+        category_en: "Software & IT",
+        category_zh: "軟件訂閱",
+        main_contact: "student-hk@adobe.com",
+        other_links: "https://www.adobe.com/hk_zh/creativecloud/buy/students.html",
+        phone_number: "800 901 238",
+        discount_details_zh: "使用學校電郵登記訂閱 CC 20+ 款應用程式即享首年超過 60% 折扣。",
+        discount_details_en: "Over 60% off Creative Cloud All Apps plan using valid school email address.",
+        created_at: "2026-01-05 00:00:00"
+      }
+    ];
+
+    /* ==========================================================================
+       3. MAP INITIALIZATION & LEAFLET LOGIC
+       ========================================================================== */
+    let mapInstance = null;
+    let mapMarkers = [];
+
+    function initMap() {
+      if (mapInstance) return;
+
+      // Center map around Hong Kong coordinates
+      mapInstance = L.map('map', { zoomControl: false }).setView([22.3193, 114.1694], 11);
+      
+      // Top right zoom control
+      L.control.zoom({ position: 'topright' }).addTo(mapInstance);
+
+      // OpenStreetMap HOT Layer
+      L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+      }).addTo(mapInstance);
+    }
+
+    function recenterMap() {
+      if (mapInstance) {
+        mapInstance.setView([22.3193, 114.1694], 11);
+      }
+    }
+
+    function updateMapMarkers(locations) {
+      if (!mapInstance) return;
+
+      // Clear existing markers
+      mapMarkers.forEach(m => mapInstance.removeLayer(m));
+      mapMarkers = [];
+
+      const isZh = state.lang === 'zh';
+
+      locations.forEach(loc => {
+        if (!loc.lat || !loc.lng) return;
+
+        const brandName = isZh ? loc.brand_zh : loc.brand_en;
+        const address = isZh ? loc.address_zh : loc.address_en;
+        const discount = isZh ? loc.discount_details_zh : loc.discount_details_en;
+        const category = isZh ? (loc.category_zh || loc.category_en) : (loc.category_en || loc.category_zh);
+
+        const marker = L.marker([loc.lat, loc.lng]).addTo(mapInstance);
+
+        // Custom Popup Card UI
+        const popupHTML = `
+          <div class="p-3">
+            <div class="text-[10px] font-bold text-brand-600 uppercase tracking-wider mb-1">${category || 'Welfare'}</div>
+            <h4 class="font-extrabold text-slate-800 text-sm leading-tight mb-1">${brandName}</h4>
+            <p class="text-xs text-slate-500 mb-2 line-clamp-2"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i>${address}</p>
+            <div class="bg-amber-50 border border-amber-200 text-amber-900 text-xs p-2 rounded-lg font-medium mb-3">
+              ${discount}
+            </div>
+            <button onclick="openModalById(${loc.location_id}, 'physical')" class="w-full py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg transition shadow-sm">
+              ${i18n[state.lang].viewDetails}
+            </button>
+          </div>
+        `;
+
+        marker.bindPopup(popupHTML);
+        mapMarkers.push(marker);
+      });
+    }
+
+    /* ==========================================================================
+       4. API FETCHING & DATA NORMALIZATION
+       ========================================================================== */
+    async function fetchWelfareData() {
+      try {
+        const [resPhysical, resOnline] = await Promise.all([
+          fetch(`${WORKER_BASE_URL}/api/physical-stores`),
+          fetch(`${WORKER_BASE_URL}/api/online-stores`)
+        ]);
+
+        if (resPhysical.ok) {
+          state.physicalStores = await resPhysical.json();
+        } else {
+          state.physicalStores = mockPhysicalStores;
+        }
+
+        if (resOnline.ok) {
+          state.onlineStores = await resOnline.json();
+        } else {
+          state.onlineStores = mockOnlineStores;
+        }
+
+      } catch (err) {
+        console.warn('Network or API issue, using local database fallback:', err);
+        state.physicalStores = mockPhysicalStores;
+        state.onlineStores = mockOnlineStores;
+      }
+
+      // Update Counts
+      document.getElementById('badge-physical-count').innerText = state.physicalStores.length;
+      document.getElementById('badge-online-count').innerText = state.onlineStores.length;
+
+      // Render Categories & Main List
+      renderCategoryFilter();
+      renderCurrentView();
+    }
+
+    /* ==========================================================================
+       5. FILTERING & RENDERING ENGINE
+       ========================================================================== */
+    function getFilteredData() {
+      const raw = state.storeType === 'physical' ? state.physicalStores : state.onlineStores;
+      const q = state.searchQuery.trim().toLowerCase();
+
+      return raw.filter(item => {
+        // Category Filter
+        if (state.selectedCategory !== 'ALL') {
+          const cat = (item.category_en || item.category_zh || '').toUpperCase();
+          if (!cat.includes(state.selectedCategory.toUpperCase())) return false;
+        }
+
+        // Favorites Filter
+        if (state.favoritesOnly) {
+          const key = `${state.storeType}_${item.location_id || item.id}`;
+          if (!state.favorites.includes(key)) return false;
+        }
+
+        // Keyword Search Filter
+        if (q) {
+          const textToSearch = [
+            item.brand_en,
+            item.brand_zh,
+            item.discount_details_en,
+            item.discount_details_zh,
+            item.address_en,
+            item.address_zh,
+            item.category_en,
+            item.category_zh
+          ].filter(Boolean).join(' ').toLowerCase();
+
+          if (!textToSearch.includes(q)) return false;
+        }
+
+        return true;
+      });
+    }
+
+    function renderCategoryFilter() {
+      const raw = state.storeType === 'physical' ? state.physicalStores : state.onlineStores;
+      const categories = new Set();
+
+      raw.forEach(i => {
+        const cat = state.lang === 'zh' ? (i.category_zh || i.category_en) : (i.category_en || i.category_zh);
+        if (cat) categories.add(cat.trim());
+      });
+
+      const container = document.getElementById('category-container');
+      const isZh = state.lang === 'zh';
+
+      let html = `
+        <button onclick="setCategory('ALL')" class="shrink-0 px-3 py-1.5 rounded-xl font-semibold transition ${state.selectedCategory === 'ALL' ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
+          ${i18n[state.lang].allCategories}
+        </button>
+      `;
+
+      categories.forEach(cat => {
+        const active = state.selectedCategory.toUpperCase() === cat.toUpperCase();
+        html += `
+          <button onclick="setCategory('${cat}')" class="shrink-0 px-3 py-1.5 rounded-xl font-semibold transition ${active ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
+            ${cat}
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderCurrentView() {
+      const filtered = getFilteredData();
+      const isZh = state.lang === 'zh';
+
+      // Update Result Count text
+      document.getElementById('results-count').innerText = i18n[state.lang].showingCount(filtered.length);
+
+      if (state.view === 'list') {
+        renderGrid(filtered);
+      } else {
+        updateMapMarkers(filtered);
+      }
+    }
+
+    function renderGrid(items) {
+      const grid = document.getElementById('store-grid');
+      const empty = document.getElementById('empty-state');
+
+      if (items.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      const isZh = state.lang === 'zh';
+
+      grid.innerHTML = items.map(item => {
+        const itemId = item.location_id || item.id;
+        const key = `${state.storeType}_${itemId}`;
+        const isFav = state.favorites.includes(key);
+
+        const brandPrimary = isZh ? item.brand_zh : item.brand_en;
+        const brandSecondary = isZh ? item.brand_en : item.brand_zh;
+        const category = isZh ? (item.category_zh || item.category_en) : (item.category_en || item.category_zh);
+        const discount = isZh ? item.discount_details_zh : item.discount_details_en;
+        const locationText = state.storeType === 'physical' ? (isZh ? item.address_zh : item.address_en) : (item.other_links || 'Online Platform');
+
+        return `
+          <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition flex flex-col justify-between group">
+            
+            <div>
+              <!-- Card Top Row: Category & Favorite Button -->
+              <div class="flex items-center justify-between mb-3">
+                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300">
+                  ${category || 'Welfare'}
+                </span>
+                <button onclick="toggleFavorite('${key}', event)" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 transition">
+                  <i class="${isFav ? 'fa-solid text-amber-500' : 'fa-regular'} fa-bookmark text-base"></i>
+                </button>
+              </div>
+
+              <!-- Brand Title -->
+              <h3 class="font-extrabold text-base text-slate-900 dark:text-white group-hover:text-brand-600 transition leading-snug">
+                ${brandPrimary}
+              </h3>
+              <p class="text-xs text-slate-400 font-medium mb-3">${brandSecondary}</p>
+
+              <!-- Discount Preview Box -->
+              <div class="bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl p-3 mb-4">
+                <div class="flex items-start space-x-2">
+                  <i class="fa-solid fa-gift text-amber-500 text-sm mt-0.5 shrink-0"></i>
+                  <p class="text-xs font-semibold text-amber-900 dark:text-amber-200 line-clamp-2 leading-relaxed">
+                    ${discount}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Bottom Row: Address/Link + Action Button -->
+            <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-700/50">
+              <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center space-x-1.5 truncate">
+                <i class="${state.storeType === 'physical' ? 'fa-solid fa-location-dot text-red-400' : 'fa-solid fa-globe text-brand-400'} shrink-0"></i>
+                <span class="truncate">${locationText}</span>
+              </div>
+
+              <button onclick="openModalById(${itemId}, '${state.storeType}')" class="w-full py-2 bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition duration-200 flex items-center justify-center space-x-1.5">
+                <span>${i18n[state.lang].viewDetails}</span>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </button>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ==========================================================================
+       6. MODAL & DETAIL DRAWER LOGIC
+       ========================================================================== */
+    function openModalById(id, type) {
+      const list = type === 'physical' ? state.physicalStores : state.onlineStores;
+      const item = list.find(i => (i.location_id || i.id) === id);
+      if (!item) return;
+
+      state.currentModalItem = { ...item, type };
+      const isZh = state.lang === 'zh';
+
+      // Populate Modal Fields
+      document.getElementById('modal-category').innerText = isZh ? (item.category_zh || item.category_en) : (item.category_en || item.category_zh);
+      document.getElementById('modal-type').innerText = type === 'physical' ? (isZh ? '實體店' : 'Physical Store') : (isZh ? '網店' : 'Online Store');
+      
+      document.getElementById('modal-brand-primary').innerText = isZh ? item.brand_zh : item.brand_en;
+      document.getElementById('modal-brand-secondary').innerText = isZh ? item.brand_en : item.brand_zh;
+
+      document.getElementById('modal-discount').innerText = isZh ? item.discount_details_zh : item.discount_details_en;
+
+      // Handle Physical specific rows
+      const rowAddress = document.getElementById('modal-row-address');
+      const rowHours = document.getElementById('modal-row-hours');
+
+      if (type === 'physical') {
+        rowAddress.classList.remove('hidden');
+        rowHours.classList.remove('hidden');
+
+        const addr = isZh ? item.address_zh : item.address_en;
+        document.getElementById('modal-address').innerText = addr || '--';
+        
+        // Google Maps Link
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
+        document.getElementById('modal-maps-link').href = mapUrl;
+
+        const hours = isZh ? item.opening_hours_zh : item.opening_hours_en;
+        document.getElementById('modal-hours').innerText = hours || '--';
+      } else {
+        rowAddress.classList.add('hidden');
+        rowHours.classList.add('hidden');
+      }
+
+      // Phone
+      const phoneElem = document.getElementById('modal-phone');
+      if (item.phone_number) {
+        phoneElem.innerText = item.phone_number;
+        phoneElem.href = `tel:${item.phone_number.replace(/\s+/g, '')}`;
+      } else {
+        phoneElem.innerText = '--';
+        phoneElem.removeAttribute('href');
+      }
+
+      // Main Contact
+      document.getElementById('modal-contact').innerText = item.main_contact || '--';
+
+      // Links
+      const linksElem = document.getElementById('modal-links');
+      if (item.other_links) {
+        linksElem.innerText = item.other_links;
+        linksElem.href = item.other_links.startsWith('http') ? item.other_links : `https://${item.other_links}`;
+      } else {
+        linksElem.innerText = '--';
+        linksElem.removeAttribute('href');
+      }
+
+      // Update Favorite Button State in Modal
+      updateModalFavBtn();
+
+      // Show Modal
+      document.getElementById('detail-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('detail-modal').classList.add('hidden');
+      state.currentModalItem = null;
+    }
+
+    function updateModalFavBtn() {
+      if (!state.currentModalItem) return;
+      const key = `${state.currentModalItem.type}_${state.currentModalItem.location_id || state.currentModalItem.id}`;
+      const isFav = state.favorites.includes(key);
+      const btn = document.getElementById('modal-fav-btn');
+
+      if (isFav) {
+        btn.innerHTML = `<i class="fa-solid fa-bookmark text-amber-500"></i><span>${i18n[state.lang].saved}</span>`;
+        btn.classList.add('border-amber-400', 'bg-amber-50', 'dark:bg-amber-900/30');
+      } else {
+        btn.innerHTML = `<i class="fa-regular fa-bookmark"></i><span>${i18n[state.lang].saveToFavorites}</span>`;
+        btn.classList.remove('border-amber-400', 'bg-amber-50', 'dark:bg-amber-900/30');
+      }
+    }
+
+    function toggleCurrentModalFavorite() {
+      if (!state.currentModalItem) return;
+      const key = `${state.currentModalItem.type}_${state.currentModalItem.location_id || state.currentModalItem.id}`;
+      toggleFavorite(key);
+      updateModalFavBtn();
+    }
+
+    /* ==========================================================================
+       7. INTERACTION HANDLERS & EVENT LISTENERS
+       ========================================================================== */
+    function switchView(viewName) {
+      state.view = viewName;
+
+      const btnList = document.getElementById('btn-view-list');
+      const btnMap = document.getElementById('btn-view-map');
+      const viewList = document.getElementById('view-list');
+      const viewMap = document.getElementById('view-map');
+
+      if (viewName === 'list') {
+        btnList.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm";
+        btnMap.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 text-slate-600 dark:text-slate-300 hover:text-brand-600";
+        viewList.classList.remove('hidden');
+        viewMap.classList.add('hidden');
+      } else {
+        btnMap.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm";
+        btnList.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 text-slate-600 dark:text-slate-300 hover:text-brand-600";
+        viewMap.classList.remove('hidden');
+        viewList.classList.add('hidden');
+
+        // Init and refresh map layout
+        initMap();
+        setTimeout(() => {
+          if (mapInstance) mapInstance.invalidateSize();
+        }, 200);
+      }
+
+      renderCurrentView();
+    }
+
+    function setStoreType(type) {
+      state.storeType = type;
+      state.selectedCategory = 'ALL';
+
+      const btnPhys = document.getElementById('tab-type-physical');
+      const btnOnl = document.getElementById('tab-type-online');
+
+      if (type === 'physical') {
+        btnPhys.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center space-x-1.5";
+        btnOnl.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-brand-600 flex items-center space-x-1.5";
+      } else {
+        btnOnl.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center space-x-1.5";
+        btnPhys.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-brand-600 flex items-center space-x-1.5";
+      }
+
+      renderCategoryFilter();
+      renderCurrentView();
+    }
+
+    function setCategory(cat) {
+      state.selectedCategory = cat;
+      renderCategoryFilter();
+      renderCurrentView();
+    }
+
+    function handleSearchInput() {
+      const val = document.getElementById('search-input').value;
+      state.searchQuery = val;
+
+      const clearBtn = document.getElementById('clear-search');
+      if (val.trim()) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+
+      renderCurrentView();
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      state.searchQuery = '';
+      document.getElementById('clear-search').classList.add('hidden');
+      renderCurrentView();
+    }
+
+    function toggleFavoritesFilter() {
+      state.favoritesOnly = !state.favoritesOnly;
+      const btn = document.getElementById('btn-fav-filter');
+      const icon = document.getElementById('fav-icon');
+
+      if (state.favoritesOnly) {
+        btn.classList.add('border-amber-400', 'bg-amber-50', 'dark:bg-amber-900/30', 'text-amber-800');
+        icon.className = "fa-solid fa-bookmark text-amber-500";
+      } else {
+        btn.classList.remove('border-amber-400', 'bg-amber-50', 'dark:bg-amber-900/30', 'text-amber-800');
+        icon.className = "fa-solid fa-bookmark text-slate-400";
+      }
+
+      renderCurrentView();
+    }
+
+    function toggleFavorite(key, event) {
+      if (event) event.stopPropagation();
+
+      const idx = state.favorites.indexOf(key);
+      if (idx > -1) {
+        state.favorites.splice(idx, 1);
+      } else {
+        state.favorites.push(key);
+      }
+
+      localStorage.setItem('cascadia_favs', JSON.stringify(state.favorites));
+      renderCurrentView();
+    }
+
+    function resetFilters() {
+      state.selectedCategory = 'ALL';
+      state.searchQuery = '';
+      state.favoritesOnly = false;
+      document.getElementById('search-input').value = '';
+      document.getElementById('clear-search').classList.add('hidden');
+      
+      const favBtn = document.getElementById('btn-fav-filter');
+      favBtn.classList.remove('border-amber-400', 'bg-amber-50', 'dark:bg-amber-900/30', 'text-amber-800');
+      document.getElementById('fav-icon').className = "fa-solid fa-bookmark text-slate-400";
+
+      renderCategoryFilter();
+      renderCurrentView();
+    }
+
+    function toggleLanguage() {
+      state.lang = state.lang === 'en' ? 'zh' : 'en';
+      document.getElementById('lang-indicator').innerText = state.lang === 'en' ? '繁體中文' : 'English';
+      
+      applyLanguageTexts();
+      renderCategoryFilter();
+      renderCurrentView();
+    }
+
+    function applyLanguageTexts() {
+      const dict = i18n[state.lang];
+
+      document.querySelectorAll('[data-i18n]').forEach(elem => {
+        const key = elem.getAttribute('data-i18n');
+        if (dict[key] && typeof dict[key] === 'string') {
+          elem.innerText = dict[key];
+        }
+      });
+
+      document.getElementById('header-sub').innerText = dict.headerSub;
+      document.getElementById('hero-title').innerText = dict.heroTitle;
+      document.getElementById('hero-desc').innerText = dict.heroDesc;
+    }
+
+    /* ==========================================================================
+       8. INITIALIZATION ON WINDOW LOAD
+       ========================================================================== */
+    window.onload = function() {
+      applyLanguageTexts();
+      fetchWelfareData();
+
+      // Keyboard escape to close modal
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+      });
+    };
+  </script>
+</body>
+</html>
