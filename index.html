@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cascadia External Welfare Platform | 卡斯卡迪亞學生福利平台</title>
+  <title>Cascadia Student Welfare Platform | 卡斯卡迪亞學生福利平台</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -121,8 +121,8 @@
             </button>
           </div>
 
-          <!-- Language Switcher -->
-          <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center space-x-1.5 shadow-sm">
+          <!-- Language Switcher Button (Compact "Eng" / "繁") -->
+          <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center space-x-1.5 shadow-sm">
             <i class="fa-solid fa-globe text-brand-500"></i>
             <span id="lang-indicator">繁</span>
           </button>
@@ -134,7 +134,7 @@
   <!-- Main Container -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <!-- Hero / Welcome Banner -->
+    <!-- Hero Banner -->
     <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand-700 via-brand-600 to-teal-600 p-6 sm:p-8 text-white shadow-xl shadow-brand-900/10">
       <div class="relative z-10 max-w-2xl">
         <span class="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold text-white mb-2" data-i18n="heroBadge">
@@ -147,14 +147,13 @@
           Present your HKUGAC Student ID card at participating stores or use exclusive promo codes online to enjoy special student discounts across Hong Kong!
         </p>
       </div>
-      <!-- Decorative Background Elements -->
       <i class="fa-solid fa-graduation-cap absolute -right-4 -bottom-6 text-9xl text-white/10 transform -rotate-12 pointer-events-none"></i>
     </div>
 
     <!-- Filter & Search Controls Bar -->
     <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 dark:border-slate-700 space-y-4">
       
-      <!-- Top Row: Search input + Physical/Online Toggle -->
+      <!-- Top Row: Search + HAD 18 Districts Selector + Store Type Toggle -->
       <div class="flex flex-col sm:flex-row gap-3">
         <!-- Search Bar -->
         <div class="relative flex-grow">
@@ -171,7 +170,18 @@
           </button>
         </div>
 
-        <!-- Store Type Sub-Tabs (Physical vs Online) -->
+        <!-- District Dropdown Selector -->
+        <div id="district-selector-wrap" class="shrink-0">
+          <select 
+            id="district-select" 
+            onchange="handleDistrictChange(this.value)" 
+            class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition font-medium cursor-pointer"
+          >
+            <!-- Populated dynamically via JS -->
+          </select>
+        </div>
+
+        <!-- Store Type Selector (Physical vs Online) -->
         <div id="store-type-selector" class="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700 self-start sm:self-auto shrink-0">
           <button id="tab-type-physical" onclick="setStoreType('physical')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center space-x-1.5">
             <i class="fa-solid fa-store"></i>
@@ -190,7 +200,7 @@
       <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/50">
         <!-- Scrollable Category Pill List -->
         <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1 pr-2 text-xs" id="category-container">
-          <!-- Categories populated via JS -->
+          <!-- Populated via JS -->
         </div>
 
         <!-- Favorites Toggle -->
@@ -203,7 +213,6 @@
 
     <!-- View 1: List View Grid -->
     <div id="view-list" class="space-y-4">
-      <!-- Active Filters Bar & Count -->
       <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
         <div id="results-count">Showing 0 discounts</div>
         <div id="live-status" class="flex items-center space-x-1.5 text-emerald-600 dark:text-emerald-400">
@@ -242,7 +251,7 @@
         </button>
       </div>
 
-      <!-- Leaflet Canvas -->
+      <!-- Leaflet Canvas Container -->
       <div id="map" class="shadow-md border border-slate-200 dark:border-slate-700"></div>
     </div>
 
@@ -286,7 +295,7 @@
               <h4 class="font-bold text-amber-900 dark:text-amber-300 text-xs uppercase tracking-wider mb-1" data-i18n="discountDetails">
                 Student Welfare Privilege
               </h4>
-              <p id="modal-discount" class="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-line">Discount text here</p>
+              <p id="modal-discount" class="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-line"></p>
             </div>
           </div>
         </div>
@@ -298,14 +307,14 @@
             <span id="modal-branch-count" class="text-brand-600 dark:text-brand-400 font-bold"></span>
           </div>
           <div id="modal-branch-pills" class="flex flex-wrap gap-2">
-            <!-- Branch pill buttons generated dynamically -->
+            <!-- Branch pills generated dynamically -->
           </div>
         </div>
 
-        <!-- Business Specifics Grid -->
+        <!-- Business Specifics Grid (Clean single fields) -->
         <div class="grid grid-cols-1 gap-4 text-sm">
 
-          <!-- Address (If Physical) -->
+          <!-- Address -->
           <div id="modal-row-address" class="flex items-start space-x-3">
             <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0 text-brand-600 dark:text-brand-400">
               <i class="fa-solid fa-map-pin"></i>
@@ -319,7 +328,7 @@
             </div>
           </div>
 
-          <!-- Opening Hours (If Physical) -->
+          <!-- Opening Hours -->
           <div id="modal-row-hours" class="flex items-start space-x-3">
             <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0 text-brand-600 dark:text-brand-400">
               <i class="fa-solid fa-clock"></i>
@@ -367,7 +376,7 @@
 
       </div>
 
-      <!-- Modal Footer Actions -->
+      <!-- Modal Footer -->
       <div class="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
         <button id="modal-fav-btn" onclick="toggleCurrentModalFavorite()" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center space-x-1.5">
           <i class="fa-regular fa-bookmark"></i>
@@ -400,15 +409,52 @@
        ========================================================================== */
     const WORKER_BASE_URL = 'https://cascadia-welfare.typhoonnerd.workers.dev';
 
-    // Canonical Category Mapping with Specific Icons & Color Scheme
+    // HK 18 Administrative Districts Data (HAD Classification)
+    const HK_DISTRICTS = [
+      {
+        regionEn: 'Hong Kong Island', regionZh: '香港島',
+        districts: [
+          { id: 'CENTRAL_WESTERN', en: 'Central & Western', zh: '中西區', keywords: ['central', 'sheung wan', 'kennedy town', 'mid-levels', 'sai wan', 'admiralty', '中環', '上環', '堅尼地城', '半山', '西環', '金鐘'] },
+          { id: 'WAN_CHAI', en: 'Wan Chai', zh: '灣仔區', keywords: ['wan chai', 'causeway bay', 'happy valley', 'tai hang', '灣仔', '銅鑼灣', '跑馬地', '大坑'] },
+          { id: 'EASTERN', en: 'Eastern', zh: '東區', keywords: ['north point', 'quarry bay', 'shau kei wan', 'chai wan', 'taikoo', 'sai wan ho', '北角', '鰂魚涌', '筲箕灣', '柴灣', '太古', '西灣河'] },
+          { id: 'SOUTHERN', en: 'Southern', zh: '南區', keywords: ['aberdeen', 'repulse bay', 'stanley', 'pok fu lam', 'ap lei chau', 'cyberport', '香港仔', '淺水灣', '赤柱', '薄扶林', '鴨脷洲', '數碼港'] }
+        ]
+      },
+      {
+        regionEn: 'Kowloon', regionZh: '九龍',
+        districts: [
+          { id: 'YAU_TSIM_MONG', en: 'Yau Tsim Mong', zh: '油尖旺區', keywords: ['mong kok', 'tsim sha tsui', 'yau ma tei', 'prince edward', 'jordan', 'austin', '旺角', '尖沙咀', '油麻地', '太子', '佐敦', '柯士甸'] },
+          { id: 'SHAM_SHUI_PO', en: 'Sham Shui Po', zh: '深水埗區', keywords: ['sham shui po', 'cheung sha wan', 'lai chi kok', 'shek kip mei', '深水埗', '長沙灣', '荔枝角', '石硤尾'] },
+          { id: 'KOWLOON_CITY', en: 'Kowloon City', zh: '九龍城區', keywords: ['kowloon city', 'to kwa wan', 'ho man tin', 'kai tak', 'hung hom', 'whampoa', '九龍城', '土瓜灣', '何文田', '啟德', '紅磡', '黃埔'] },
+          { id: 'WONG_TAI_SIN', en: 'Wong Tai Sin', zh: '黃大仙區', keywords: ['wong tai sin', 'diamond hill', 'lok fu', 'san po kong', 'tsz wan shan', '黃大仙', '鑽石山', '樂富', '新蒲崗', '慈雲山'] },
+          { id: 'KWUN_TONG', en: 'Kwun Tong', zh: '觀塘區', keywords: ['kwun tong', 'kowloon bay', 'ngau tau kok', 'yau tong', 'lam tin', '觀塘', '九龍灣', '牛頭角', '油塘', '藍田'] }
+        ]
+      },
+      {
+        regionEn: 'New Territories & Islands', regionZh: '新界及離島',
+        districts: [
+          { id: 'KWAI_TSING', en: 'Kwai Tsing', zh: '葵青區', keywords: ['kwai chung', 'tsing yi', 'kwai fong', '葵涌', '青衣', '葵芳'] },
+          { id: 'TSUEN_WAN', en: 'Tsuen Wan', zh: '荃灣區', keywords: ['tsuen wan', 'sham tseng', '荃灣', '深井'] },
+          { id: 'TUEN_MUN', en: 'Tuen Mun', zh: '屯門區', keywords: ['tuen mun', '屯門'] },
+          { id: 'YUEN_LONG', en: 'Yuen Long', zh: '元朗區', keywords: ['yuen long', 'tin shui wai', '元朗', '天水圍'] },
+          { id: 'NORTH', en: 'North', zh: '北區', keywords: ['sheung shui', 'fanling', '上水', '粉嶺'] },
+          { id: 'TAI_PO', en: 'Tai Po', zh: '大埔區', keywords: ['tai po', '大埔'] },
+          { id: 'SHA_TIN', en: 'Sha Tin', zh: '沙田區', keywords: ['sha tin', 'tai wai', 'ma on shan', 'fo tan', '沙田', '大圍', '馬鞍山', '火炭'] },
+          { id: 'SAI_KUNG', en: 'Sai Kung', zh: '西貢區', keywords: ['sai kung', 'tseung kwan o', 'hang hau', 'po lam', 'tiu keng leng', '西貢', '將軍澳', '坑口', '寶琳', '調景嶺'] },
+          { id: 'ISLANDS', en: 'Islands', zh: '離島區', keywords: ['tung chung', 'discovery bay', 'lantau', 'lamma', 'cheung chau', '東涌', '愉景灣', '大嶼山', '南丫島', '長洲'] }
+        ]
+      }
+    ];
+
+    // Canonical Category Mapping
     const CATEGORIES = [
-      { id: 'CULTURE', en: 'Culture & Media', zh: '文化與媒體', icon: 'fa-film', color: '#9333ea', bgLight: 'bg-purple-100', textLight: 'text-purple-800' },
-      { id: 'EDUCATION', en: 'Education & Stationery', zh: '教育與文具', icon: 'fa-book-open', color: '#2563eb', bgLight: 'bg-blue-100', textLight: 'text-blue-800' },
-      { id: 'ENTERTAINMENT', en: 'Entertainment & Leisure', zh: '娛樂與休閒', icon: 'fa-gamepad', color: '#e11d48', bgLight: 'bg-rose-100', textLight: 'text-rose-800' },
-      { id: 'FOOD', en: 'Food & Beverage', zh: '食品與飲料', icon: 'fa-utensils', color: '#d97706', bgLight: 'bg-amber-100', textLight: 'text-amber-800' },
-      { id: 'GADGETS', en: 'Gadgets & Electronics', zh: '電子產品與工具', icon: 'fa-laptop', color: '#0891b2', bgLight: 'bg-cyan-100', textLight: 'text-cyan-800' },
-      { id: 'HEALTH', en: 'Health & Wellness', zh: '健康與保健', icon: 'fa-heart-pulse', color: '#16a34a', bgLight: 'bg-emerald-100', textLight: 'text-emerald-800' },
-      { id: 'LIFESTYLE', en: 'Lifestyle & Retail', zh: '零售', icon: 'fa-bag-shopping', color: '#4f46e5', bgLight: 'bg-indigo-100', textLight: 'text-indigo-800' }
+      { id: 'CULTURE', en: 'Culture & Media', zh: '文化與媒體', icon: 'fa-film', color: '#9333ea' },
+      { id: 'EDUCATION', en: 'Education & Stationery', zh: '教育與文具', icon: 'fa-book-open', color: '#2563eb' },
+      { id: 'ENTERTAINMENT', en: 'Entertainment & Leisure', zh: '娛樂與休閒', icon: 'fa-gamepad', color: '#e11d48' },
+      { id: 'FOOD', en: 'Food & Beverage', zh: '食品與飲料', icon: 'fa-utensils', color: '#d97706' },
+      { id: 'GADGETS', en: 'Gadgets & Electronics', zh: '電子產品與工具', icon: 'fa-laptop', color: '#0891b2' },
+      { id: 'HEALTH', en: 'Health & Wellness', zh: '健康與保健', icon: 'fa-heart-pulse', color: '#16a34a' },
+      { id: 'LIFESTYLE', en: 'Lifestyle & Retail', zh: '零售', icon: 'fa-bag-shopping', color: '#4f46e5' }
     ];
 
     function getCategoryConfig(catEn, catZh) {
@@ -425,12 +471,11 @@
         en: catEn || 'General',
         zh: catZh || '一般折扣',
         icon: 'fa-tags',
-        color: '#0d9488',
-        bgLight: 'bg-teal-100',
-        textLight: 'text-teal-800'
+        color: '#0d9488'
       };
     }
 
+    /* Process multiline text to avoid leading empty lines */
     function processLinebreaks(text) {
       if (!text) return '';
       return String(text).replace(/\\n/g, '\n').trim();
@@ -442,12 +487,13 @@
       view: 'list', // 'list' | 'map'
       storeType: 'physical', // 'physical' | 'online'
       selectedCategoryId: 'ALL',
+      selectedDistrict: 'ALL',
       searchQuery: '',
       favoritesOnly: false,
       favorites: JSON.parse(localStorage.getItem('cascadia_favs') || '[]'),
       
-      physicalLocationsRaw: [], // Raw locations array for map view
-      physicalBrandsGrouped: [], // Grouped brands with branches for list view
+      physicalLocationsRaw: [],
+      physicalBrandsGrouped: [],
       onlineStores: [],
       
       currentModalBrand: null,
@@ -478,15 +524,16 @@
         saved: "Bookmarked",
         close: "Close",
         allCategories: "All Categories",
+        allDistricts: "All HK Districts",
         viewDetails: "View Details",
         noResultsTitle: "No Welfare Discounts Found",
-        noResultsDesc: "Try clearing your search keyword or switching categories.",
+        noResultsDesc: "Try clearing your search keyword or switching categories/districts.",
         resetFilters: "Reset All Filters",
         mapGuide: "Click on any physical store branch pin to inspect details and student discount terms.",
         recenterMap: "Center Hong Kong",
         selectBranch: "Select Branch Location:",
         branchCount: (count) => `${count} Branch${count > 1 ? 'es' : ''}`,
-        branchTabName: (num, name) => `Branch ${num}${name ? ': ' + name : ''}`,
+        branchTabName: (num, name) => `Branch ${num}: ${name}`,
         showingCount: (count) => `Showing ${count} discount entry/entries`
       },
       zh: {
@@ -511,21 +558,85 @@
         saved: "已收藏",
         close: "關閉",
         allCategories: "所有分類",
+        allDistricts: "全港所有地區",
         viewDetails: "查看詳情",
         noResultsTitle: "未有找到相關學生福利",
-        noResultsDesc: "請嘗試清除搜尋關鍵字，或切換其他分類標籤。",
+        noResultsDesc: "請嘗試清除搜尋關鍵字，或切換其他地區及分類標籤。",
         resetFilters: "重置所有篩選",
         mapGuide: "點擊地圖上的分店地標即可查看店舖營業資訊及學生優惠詳情。",
         recenterMap: "重置地圖至香港",
         selectBranch: "選擇分店門市：",
         branchCount: (count) => `${count} 間分店`,
-        branchTabName: (num, name) => `分店 ${num}${name ? ': ' + name : ''}`,
+        branchTabName: (num, name) => `分店 ${num}: ${name}`,
         showingCount: (count) => `顯示 ${count} 個福利項目`
       }
     };
 
+    /* Helper: Extract clean neighborhood/area name for branch tab pills */
+    function extractAreaName(addressEn, addressZh, isZh) {
+      const textEn = (addressEn || '').toLowerCase();
+      const textZh = addressZh || '';
+
+      const AREAS = [
+        { en: 'Mong Kok', zh: '旺角' },
+        { en: 'Central', zh: '中環' },
+        { en: 'Causeway Bay', zh: '銅鑼灣' },
+        { en: 'Tsim Sha Tsui', zh: '尖沙咀' },
+        { en: 'Sha Tin', zh: '沙田' },
+        { en: 'Wan Chai', zh: '灣仔' },
+        { en: 'Kwun Tong', zh: '觀塘' },
+        { en: 'Kowloon Bay', zh: '九龍灣' },
+        { en: 'Tseung Kwan O', zh: '將軍澳' },
+        { en: 'Tsuen Wan', zh: '荃灣' },
+        { en: 'North Point', zh: '北角' },
+        { en: 'Quarry Bay', zh: '鰂魚涌' },
+        { en: 'Sham Shui Po', zh: '深水埗' },
+        { en: 'Lai Chi Kok', zh: '荔枝角' },
+        { en: 'Tuen Mun', zh: '屯門' },
+        { en: 'Yuen Long', zh: '元朗' },
+        { en: 'Tai Po', zh: '大埔' },
+        { en: 'Sheung Shui', zh: '上水' },
+        { en: 'Fanling', zh: '粉嶺' },
+        { en: 'Tung Chung', zh: '東涌' },
+        { en: 'Sheung Wan', zh: '上環' },
+        { en: 'Admiralty', zh: '金鐘' },
+        { en: 'Hung Hom', zh: '紅磡' },
+        { en: 'Yau Ma Tei', zh: '油麻地' },
+        { en: 'Prince Edward', zh: '太子' },
+        { en: 'Tai Wai', zh: '大圍' },
+        { en: 'Ma On Shan', zh: '馬鞍山' }
+      ];
+
+      for (const area of AREAS) {
+        if (textZh.includes(area.zh) || textEn.includes(area.en.toLowerCase())) {
+          return isZh ? area.zh : area.en;
+        }
+      }
+
+      const fallback = isZh ? textZh.split('\n')[0] : textEn.split('\n')[0];
+      const parts = fallback.split(',');
+      const lastPart = parts[parts.length - 1].trim();
+      return lastPart.length > 0 && lastPart.length < 20 ? lastPart : fallback.substring(0, 15);
+    }
+
+    /* Helper: Check if a branch is located inside the selected district */
+    function isBranchInDistrict(branch, districtId) {
+      if (!districtId || districtId === 'ALL') return true;
+
+      let targetDist = null;
+      for (const reg of HK_DISTRICTS) {
+        const found = reg.districts.find(d => d.id === districtId);
+        if (found) { targetDist = found; break; }
+      }
+
+      if (!targetDist) return true;
+
+      const haystack = `${branch.address_en || ''} ${branch.address_zh || ''}`.toLowerCase();
+      return targetDist.keywords.some(kw => haystack.includes(kw.toLowerCase()));
+    }
+
     /* ==========================================================================
-       2. MOCK DATA FALLBACK (With Multi-Branch Example)
+       2. MOCK DATA FALLBACK
        ========================================================================== */
     const mockPhysicalStores = [
       {
@@ -636,8 +747,7 @@
         other_links: "https://www.klook.com/zh-HK/",
         phone_number: "2123 4567",
         discount_details_zh: "輸入推廣碼「CASCADIA2026」即享：\n1. 全站展覽及門票 88 折\n2. 工作坊體驗立減 HK$30",
-        discount_details_en: "Use code [CASCADIA2026] for:\n1. 12% off exhibitions and attraction tickets\n2. HK$30 off DIY workshops",
-        created_at: "2026-01-01 00:00:00"
+        discount_details_en: "Use code [CASCADIA2026] for:\n1. 12% off exhibitions and attraction tickets\n2. HK$30 off DIY workshops"
       },
       {
         id: 202,
@@ -649,8 +759,7 @@
         other_links: "https://www.adobe.com/hk_zh/creativecloud/buy/students.html",
         phone_number: "800 901 238",
         discount_details_zh: "使用學校電郵登記訂閱 CC 20+ 款應用程式即享首年超過 60% 折扣。",
-        discount_details_en: "Over 60% off Creative Cloud All Apps plan using valid school email address.",
-        created_at: "2026-01-05 00:00:00"
+        discount_details_en: "Over 60% off Creative Cloud All Apps plan using valid school email address."
       }
     ];
 
@@ -810,11 +919,13 @@
       const q = state.searchQuery.trim().toLowerCase();
 
       if (state.view === 'map') {
-        // Map View always uses raw physical branch locations
         return state.physicalLocationsRaw.filter(loc => {
           if (state.selectedCategoryId !== 'ALL') {
             const itemCatConfig = getCategoryConfig(loc.category_en, loc.category_zh);
             if (itemCatConfig.id !== state.selectedCategoryId) return false;
+          }
+          if (state.selectedDistrict !== 'ALL') {
+            if (!isBranchInDistrict(loc, state.selectedDistrict)) return false;
           }
           if (state.favoritesOnly) {
             const key = `physical_${loc.brand_id}`;
@@ -828,7 +939,6 @@
         });
       }
 
-      // List View uses grouped brands for physical or online stores
       const raw = isPhysical ? state.physicalBrandsGrouped : state.onlineStores;
 
       return raw.filter(item => {
@@ -840,6 +950,11 @@
         if (state.favoritesOnly) {
           const key = `${state.storeType}_${item.brand_id || item.id}`;
           if (!state.favorites.includes(key)) return false;
+        }
+
+        if (isPhysical && state.selectedDistrict !== 'ALL' && item.branches) {
+          const hasBranchInDist = item.branches.some(b => isBranchInDistrict(b, state.selectedDistrict));
+          if (!hasBranchInDist) return false;
         }
 
         if (q) {
@@ -864,23 +979,26 @@
       });
     }
 
+    /* ==========================================================================
+       5. UI RENDERERS & EVENT HANDLERS
+       ========================================================================== */
     function renderCategoryFilter() {
       const container = document.getElementById('category-container');
       const isZh = state.lang === 'zh';
 
       let html = `
-        <button onclick="setCategory('ALL')" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${state.selectedCategoryId === 'ALL' ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
-          ${i18n[state.lang].allCategories}
+        <button onclick="setCategory('ALL')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center space-x-1 ${state.selectedCategoryId === 'ALL' ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
+          <span>${i18n[state.lang].allCategories}</span>
         </button>
       `;
 
       CATEGORIES.forEach(cat => {
-        const active = state.selectedCategoryId === cat.id;
+        const isSelected = state.selectedCategoryId === cat.id;
         const label = isZh ? cat.zh : cat.en;
 
         html += `
-          <button onclick="setCategory('${cat.id}')" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center space-x-1.5 ${active ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
-            <i class="fa-solid ${cat.icon}"></i>
+          <button onclick="setCategory('${cat.id}')" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition flex items-center space-x-1.5 ${isSelected ? 'text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}" style="${isSelected ? `background-color: ${cat.color}` : ''}">
+            <i class="fa-solid ${cat.icon} text-[11px]"></i>
             <span>${label}</span>
           </button>
         `;
@@ -889,309 +1007,61 @@
       container.innerHTML = html;
     }
 
-    function renderCurrentView() {
-      const filtered = getFilteredData();
-      document.getElementById('results-count').innerText = i18n[state.lang].showingCount(filtered.length);
-
-      if (state.view === 'list') {
-        renderGrid(filtered);
-      } else {
-        updateMapMarkers(filtered);
-      }
-    }
-
-    function renderGrid(items) {
-      const grid = document.getElementById('store-grid');
-      const empty = document.getElementById('empty-state');
-
-      if (items.length === 0) {
-        grid.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-      }
-
-      empty.classList.add('hidden');
+    function renderDistrictFilter() {
+      const select = document.getElementById('district-select');
       const isZh = state.lang === 'zh';
 
-      grid.innerHTML = items.map(item => {
-        const itemId = item.brand_id || item.id;
-        const key = `${state.storeType}_${itemId}`;
-        const isFav = state.favorites.includes(key);
+      let html = `<option value="ALL">${i18n[state.lang].allDistricts}</option>`;
 
-        const catConfig = getCategoryConfig(item.category_en, item.category_zh);
-        const categoryName = isZh ? catConfig.zh : catConfig.en;
+      HK_DISTRICTS.forEach(region => {
+        html += `<optgroup label="${isZh ? region.regionZh : region.regionEn}">`;
+        region.districts.forEach(d => {
+          const label = isZh ? d.zh : d.en;
+          const selected = state.selectedDistrict === d.id ? 'selected' : '';
+          html += `<option value="${d.id}" ${selected}>${label}</option>`;
+        });
+        html += `</optgroup>`;
+      });
 
-        const brandPrimary = isZh ? item.brand_zh : item.brand_en;
-        const brandSecondary = isZh ? item.brand_en : item.brand_zh;
-        
-        const discount = processLinebreaks(isZh ? item.discount_details_zh : item.discount_details_en);
-
-        let locationText = '';
-        let branchBadge = '';
-
-        if (state.storeType === 'physical') {
-          const count = item.branches ? item.branches.length : 1;
-          branchBadge = `<span class="px-2 py-0.5 rounded-md bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 font-bold text-[10px]"><i class="fa-solid fa-store mr-1"></i>${i18n[state.lang].branchCount(count)}</span>`;
-          
-          if (item.branches && item.branches.length > 0) {
-            locationText = processLinebreaks(isZh ? item.branches[0].address_zh : item.branches[0].address_en);
-            if (count > 1) locationText += ` (+${count - 1} more)`;
-          }
-        } else {
-          locationText = processLinebreaks(item.other_links || 'Online Platform');
-        }
-
-        return `
-          <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition flex flex-col justify-between group">
-            
-            <div>
-              <div class="flex items-center justify-between mb-3">
-                <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-bold ${catConfig.bgLight} ${catConfig.textLight}">
-                  <i class="fa-solid ${catConfig.icon}"></i>
-                  <span>${categoryName}</span>
-                </span>
-                <button onclick="toggleFavorite('${key}', event)" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 transition">
-                  <i class="${isFav ? 'fa-solid text-amber-500' : 'fa-regular'} fa-bookmark text-base"></i>
-                </button>
-              </div>
-
-              <div class="flex items-start justify-between gap-2">
-                <div>
-                  <h3 class="font-extrabold text-base text-slate-900 dark:text-white group-hover:text-brand-600 transition leading-snug">
-                    ${brandPrimary}
-                  </h3>
-                  <p class="text-xs text-slate-400 font-medium mb-2">${brandSecondary}</p>
-                </div>
-                ${branchBadge}
-              </div>
-
-              <div class="bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl p-3 mb-4">
-                <div class="flex items-start space-x-2">
-                  <i class="fa-solid fa-gift text-amber-500 text-sm mt-0.5 shrink-0"></i>
-                  <p class="text-xs font-semibold text-amber-900 dark:text-amber-200 leading-relaxed whitespace-pre-line line-clamp-3">${discount}</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-700/50">
-              <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center space-x-1.5 truncate">
-                <i class="${state.storeType === 'physical' ? 'fa-solid fa-location-dot text-red-400' : 'fa-solid fa-globe text-brand-400'} shrink-0"></i>
-                <span class="truncate whitespace-pre-line">${locationText}</span>
-              </div>
-
-              <button onclick="openModalByBrandId(${itemId})" class="w-full py-2 bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition duration-200 flex items-center justify-center space-x-1.5">
-                <span>${i18n[state.lang].viewDetails}</span>
-                <i class="fa-solid fa-chevron-right text-[10px]"></i>
-              </button>
-            </div>
-
-          </div>
-        `;
-      }).join('');
-    }
-
-    /* ==========================================================================
-       5. MODAL & DETAIL DRAWER LOGIC
-       ========================================================================== */
-    function openModalByBrandId(brandId, targetLocationId = null) {
-      const isZh = state.lang === 'zh';
-      let brandObj = null;
-
-      if (state.storeType === 'physical') {
-        brandObj = state.physicalBrandsGrouped.find(b => b.brand_id === brandId);
-      } else {
-        brandObj = state.onlineStores.find(s => s.id === brandId);
-      }
-
-      if (!brandObj) return;
-
-      state.currentModalBrand = brandObj;
-      state.currentModalSelectedBranchIndex = 0;
-
-      // If targeted location ID is specified (e.g. from map popup)
-      if (targetLocationId && brandObj.branches) {
-        const idx = brandObj.branches.findIndex(b => b.location_id === targetLocationId);
-        if (idx !== -1) state.currentModalSelectedBranchIndex = idx;
-      }
-
-      const catConfig = getCategoryConfig(brandObj.category_en, brandObj.category_zh);
-
-      const catElem = document.getElementById('modal-category');
-      catElem.innerText = isZh ? catConfig.zh : catConfig.en;
-      catElem.className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${catConfig.bgLight} ${catConfig.textLight}`;
-
-      document.getElementById('modal-type').innerText = state.storeType === 'physical' ? (isZh ? '實體店' : 'Physical Store') : (isZh ? '網店' : 'Online Store');
+      select.innerHTML = html;
       
-      document.getElementById('modal-brand-primary').innerText = isZh ? brandObj.brand_zh : brandObj.brand_en;
-      document.getElementById('modal-brand-secondary').innerText = isZh ? brandObj.brand_en : brandObj.brand_zh;
-
-      document.getElementById('modal-discount').innerText = processLinebreaks(isZh ? brandObj.discount_details_zh : brandObj.discount_details_en);
-
-      // Render branch selector if multiple physical branches exist
-      const branchContainer = document.getElementById('modal-branch-container');
-      const branchPills = document.getElementById('modal-branch-pills');
-
-      if (state.storeType === 'physical' && brandObj.branches && brandObj.branches.length > 0) {
-        branchContainer.classList.remove('hidden');
-        document.getElementById('modal-branch-count').innerText = i18n[state.lang].branchCount(brandObj.branches.length);
-
-        branchPills.innerHTML = brandObj.branches.map((b, idx) => {
-          const isSelected = idx === state.currentModalSelectedBranchIndex;
-          const shortAddr = (isZh ? b.address_zh : b.address_en).split('\n')[0].substring(0, 15);
-          const tabLabel = i18n[state.lang].branchTabName(idx + 1, shortAddr);
-
-          return `
-            <button onclick="selectModalBranch(${idx})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition ${isSelected ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
-              <i class="fa-solid fa-location-dot mr-1 text-[10px]"></i>
-              <span>${tabLabel}</span>
-            </button>
-          `;
-        }).join('');
+      const selectorWrap = document.getElementById('district-selector-wrap');
+      if (state.storeType === 'online') {
+        selectorWrap.classList.add('hidden');
       } else {
-        branchContainer.classList.add('hidden');
-      }
-
-      updateModalBranchInfo();
-
-      // Contact & Links
-      document.getElementById('modal-contact').innerText = brandObj.main_contact || '--';
-
-      const linksElem = document.getElementById('modal-links');
-      if (brandObj.other_links) {
-        linksElem.innerText = brandObj.other_links;
-        linksElem.href = brandObj.other_links.startsWith('http') ? brandObj.other_links : `https://${brandObj.other_links}`;
-      } else {
-        linksElem.innerText = '--';
-        linksElem.removeAttribute('href');
-      }
-
-      updateModalFavBtn();
-      document.getElementById('detail-modal').classList.remove('hidden');
-    }
-
-    function selectModalBranch(index) {
-      state.currentModalSelectedBranchIndex = index;
-      
-      const brandObj = state.currentModalBrand;
-      const isZh = state.lang === 'zh';
-      const branchPills = document.getElementById('modal-branch-pills');
-
-      if (brandObj && brandObj.branches) {
-        branchPills.innerHTML = brandObj.branches.map((b, idx) => {
-          const isSelected = idx === state.currentModalSelectedBranchIndex;
-          const shortAddr = (isZh ? b.address_zh : b.address_en).split('\n')[0].substring(0, 15);
-          const tabLabel = i18n[state.lang].branchTabName(idx + 1, shortAddr);
-
-          return `
-            <button onclick="selectModalBranch(${idx})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition ${isSelected ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
-              <i class="fa-solid fa-location-dot mr-1 text-[10px]"></i>
-              <span>${tabLabel}</span>
-            </button>
-          `;
-        }).join('');
-      }
-
-      updateModalBranchInfo();
-    }
-
-    function updateModalBranchInfo() {
-      const brandObj = state.currentModalBrand;
-      const isZh = state.lang === 'zh';
-
-      const rowAddress = document.getElementById('modal-row-address');
-      const rowHours = document.getElementById('modal-row-hours');
-      const phoneElem = document.getElementById('modal-phone');
-
-      if (state.storeType === 'physical' && brandObj && brandObj.branches && brandObj.branches.length > 0) {
-        rowAddress.classList.remove('hidden');
-        rowHours.classList.remove('hidden');
-
-        const activeBranch = brandObj.branches[state.currentModalSelectedBranchIndex] || brandObj.branches[0];
-
-        const addr = processLinebreaks(isZh ? activeBranch.address_zh : activeBranch.address_en);
-        document.getElementById('modal-address').innerText = addr || '--';
-        
-        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${activeBranch.lat},${activeBranch.lng}`;
-        document.getElementById('modal-maps-link').href = mapUrl;
-
-        const hours = processLinebreaks(isZh ? activeBranch.opening_hours_zh : activeBranch.opening_hours_en);
-        document.getElementById('modal-hours').innerText = hours || '--';
-
-        if (activeBranch.phone_number) {
-          phoneElem.innerText = activeBranch.phone_number;
-          phoneElem.href = `tel:${activeBranch.phone_number.replace(/\s+/g, '')}`;
-        } else {
-          phoneElem.innerText = '--';
-          phoneElem.removeAttribute('href');
-        }
-      } else {
-        rowAddress.classList.add('hidden');
-        rowHours.classList.add('hidden');
-
-        if (brandObj && brandObj.phone_number) {
-          phoneElem.innerText = brandObj.phone_number;
-          phoneElem.href = `tel:${brandObj.phone_number.replace(/\s+/g, '')}`;
-        } else {
-          phoneElem.innerText = '--';
-          phoneElem.removeAttribute('href');
-        }
+        selectorWrap.classList.remove('hidden');
       }
     }
 
-    function closeModal() {
-      document.getElementById('detail-modal').classList.add('hidden');
-      state.currentModalBrand = null;
+    function handleDistrictChange(districtId) {
+      state.selectedDistrict = districtId;
+      renderCurrentView();
     }
 
-    function updateModalFavBtn() {
-      if (!state.currentModalBrand) return;
-      const key = `${state.storeType}_${state.currentModalBrand.brand_id || state.currentModalBrand.id}`;
-      const isFav = state.favorites.includes(key);
-      const btn = document.getElementById('modal-fav-btn');
-
-      if (isFav) {
-        btn.innerHTML = `<i class="fa-solid fa-bookmark text-amber-500"></i><span>${i18n[state.lang].saved}</span>`;
-        btn.classList.add('border-amber-400', 'bg-amber-50', 'dark:bg-amber-900/30');
-      } else {
-        btn.innerHTML = `<i class="fa-regular fa-bookmark"></i><span>${i18n[state.lang].saveToFavorites}</span>`;
-        btn.classList.remove('border-amber-400', 'bg-amber-50', 'dark:bg-amber-900/30');
-      }
-    }
-
-    function toggleCurrentModalFavorite() {
-      if (!state.currentModalBrand) return;
-      const key = `${state.storeType}_${state.currentModalBrand.brand_id || state.currentModalBrand.id}`;
-      toggleFavorite(key);
-      updateModalFavBtn();
-    }
-
-    /* ==========================================================================
-       6. INTERACTION HANDLERS & EVENT LISTENERS
-       ========================================================================== */
-    function switchView(viewName) {
-      state.view = viewName;
-
-      // In Map view, ensure physical stores mode is active
-      if (viewName === 'map' && state.storeType === 'online') {
+    function switchView(viewMode) {
+      if (viewMode === 'map' && state.storeType === 'online') {
         state.storeType = 'physical';
         updateStoreTypeUI();
+        renderDistrictFilter();
       }
+      
+      state.view = viewMode;
 
       const btnList = document.getElementById('btn-view-list');
       const btnMap = document.getElementById('btn-view-map');
-      const viewList = document.getElementById('view-list');
-      const viewMap = document.getElementById('view-map');
+      const viewListElem = document.getElementById('view-list');
+      const viewMapElem = document.getElementById('view-map');
 
-      if (viewName === 'list') {
+      if (viewMode === 'list') {
         btnList.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm";
         btnMap.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 text-slate-600 dark:text-slate-300 hover:text-brand-600";
-        viewList.classList.remove('hidden');
-        viewMap.classList.add('hidden');
+        viewListElem.classList.remove('hidden');
+        viewMapElem.classList.add('hidden');
       } else {
         btnMap.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm";
         btnList.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 text-slate-600 dark:text-slate-300 hover:text-brand-600";
-        viewMap.classList.remove('hidden');
-        viewList.classList.add('hidden');
+        viewListElem.classList.add('hidden');
+        viewMapElem.classList.remove('hidden');
 
         initMap();
         setTimeout(() => {
@@ -1202,30 +1072,41 @@
       renderCurrentView();
     }
 
+    function switchTab(tab) {
+      switchView('list');
+    }
+
     function setStoreType(type) {
       state.storeType = type;
       state.selectedCategoryId = 'ALL';
+      state.selectedDistrict = 'ALL';
 
-      // If switching to Online Stores while in Map View, automatically revert to List View
       if (type === 'online' && state.view === 'map') {
         switchView('list');
       } else {
         updateStoreTypeUI();
+        renderDistrictFilter();
         renderCategoryFilter();
         renderCurrentView();
       }
     }
 
     function updateStoreTypeUI() {
-      const btnPhys = document.getElementById('tab-type-physical');
-      const btnOnl = document.getElementById('tab-type-online');
+      const btnPhysical = document.getElementById('tab-type-physical');
+      const btnOnline = document.getElementById('tab-type-online');
+      const badgePhysical = document.getElementById('badge-physical-count');
+      const badgeOnline = document.getElementById('badge-online-count');
 
       if (state.storeType === 'physical') {
-        btnPhys.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center space-x-1.5";
-        btnOnl.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-brand-600 flex items-center space-x-1.5";
+        btnPhysical.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center space-x-1.5";
+        btnOnline.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-brand-600 flex items-center space-x-1.5";
+        badgePhysical.className = "ml-1 text-[10px] bg-brand-100 text-brand-800 px-1.5 py-0.5 rounded-full font-bold";
+        badgeOnline.className = "ml-1 text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded-full font-bold";
       } else {
-        btnOnl.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center space-x-1.5";
-        btnPhys.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-brand-600 flex items-center space-x-1.5";
+        btnOnline.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center space-x-1.5";
+        btnPhysical.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-brand-600 flex items-center space-x-1.5";
+        badgeOnline.className = "ml-1 text-[10px] bg-brand-100 text-brand-800 px-1.5 py-0.5 rounded-full font-bold";
+        badgePhysical.className = "ml-1 text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded-full font-bold";
       }
     }
 
@@ -1288,6 +1169,7 @@
 
     function resetFilters() {
       state.selectedCategoryId = 'ALL';
+      state.selectedDistrict = 'ALL';
       state.searchQuery = '';
       state.favoritesOnly = false;
       document.getElementById('search-input').value = '';
@@ -1297,6 +1179,7 @@
       favBtn.classList.remove('border-amber-400', 'bg-amber-50', 'dark:bg-amber-900/30', 'text-amber-800');
       document.getElementById('fav-icon').className = "fa-solid fa-bookmark text-slate-400";
 
+      renderDistrictFilter();
       renderCategoryFilter();
       renderCurrentView();
     }
@@ -1306,6 +1189,7 @@
       document.getElementById('lang-indicator').innerText = state.lang === 'en' ? '繁' : 'Eng';
       
       applyLanguageTexts();
+      renderDistrictFilter();
       renderCategoryFilter();
       renderCurrentView();
     }
@@ -1325,11 +1209,299 @@
       document.getElementById('hero-desc').innerText = dict.heroDesc;
     }
 
+    function renderCurrentView() {
+      const filteredData = getFilteredData();
+      const resultsCountElem = document.getElementById('results-count');
+      const gridElem = document.getElementById('store-grid');
+      const emptyStateElem = document.getElementById('empty-state');
+
+      resultsCountElem.innerText = i18n[state.lang].showingCount(filteredData.length);
+
+      if (state.view === 'map') {
+        updateMapMarkers(filteredData);
+        return;
+      }
+
+      if (filteredData.length === 0) {
+        gridElem.innerHTML = '';
+        emptyStateElem.classList.remove('hidden');
+        return;
+      }
+
+      emptyStateElem.classList.add('hidden');
+      const isZh = state.lang === 'zh';
+      const isPhysical = state.storeType === 'physical';
+
+      gridElem.innerHTML = filteredData.map(item => {
+        const itemId = isPhysical ? item.brand_id : item.id;
+        const favKey = `${state.storeType}_${itemId}`;
+        const isFav = state.favorites.includes(favKey);
+        const catConfig = getCategoryConfig(item.category_en, item.category_zh);
+        const catLabel = isZh ? catConfig.zh : catConfig.en;
+        const brandName = isZh ? (item.brand_zh || item.brand_en) : (item.brand_en || item.brand_zh);
+        const discountText = processLinebreaks(isZh ? (item.discount_details_zh || item.discount_details_en) : (item.discount_details_en || item.discount_details_zh));
+
+        let branchBadge = '';
+        let locationPreview = '';
+
+        if (isPhysical && item.branches) {
+          const bCount = item.branches.length;
+          branchBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"><i class="fa-solid fa-store mr-1"></i>${i18n[state.lang].branchCount(bCount)}</span>`;
+          
+          const firstBranch = item.branches[0];
+          const address = processLinebreaks(isZh ? firstBranch.address_zh : firstBranch.address_en);
+          locationPreview = `<div class="mt-2 text-xs text-slate-500 line-clamp-1"><i class="fa-solid fa-location-dot text-brand-600 mr-1"></i>${address}</div>`;
+        }
+
+        return `
+          <div onclick="openModalByBrandId(${itemId})" class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition duration-200 cursor-pointer flex flex-col justify-between group">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="px-2.5 py-0.5 rounded-full text-xs font-bold text-white shadow-sm flex items-center space-x-1" style="background-color: ${catConfig.color}">
+                    <i class="fa-solid ${catConfig.icon} text-[10px]"></i>
+                    <span>${catLabel}</span>
+                  </span>
+                  ${branchBadge}
+                </div>
+                <button onclick="toggleFavorite('${favKey}', event)" class="text-slate-300 hover:text-amber-400 dark:text-slate-600 transition p-1">
+                  <i class="${isFav ? 'fa-solid fa-bookmark text-amber-500' : 'fa-regular fa-bookmark'} text-base"></i>
+                </button>
+              </div>
+
+              <h3 class="font-extrabold text-slate-900 dark:text-white text-base group-hover:text-brand-600 dark:group-hover:text-brand-400 transition leading-snug">
+                ${brandName}
+              </h3>
+
+              ${locationPreview}
+
+              <div class="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-line line-clamp-3"><i class="fa-solid fa-tags text-amber-500 mr-1.5"></i>${discountText}</div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-xs font-bold text-brand-600 dark:text-brand-400">
+              <span>${i18n[state.lang].viewDetails}</span>
+              <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ==========================================================================
+       6. MODAL & MULTI-BRANCH HANDLERS
+       ========================================================================== */
+    function openModalByBrandId(brandId, locationId = null) {
+      const isPhysical = state.storeType === 'physical';
+      let targetBrand = null;
+      let targetIndex = 0;
+
+      if (isPhysical) {
+        targetBrand = state.physicalBrandsGrouped.find(b => b.brand_id === brandId);
+        if (targetBrand && locationId && targetBrand.branches) {
+          const foundIdx = targetBrand.branches.findIndex(loc => loc.location_id === locationId);
+          if (foundIdx > -1) targetIndex = foundIdx;
+        }
+      } else {
+        targetBrand = state.onlineStores.find(s => s.id === brandId);
+      }
+
+      if (targetBrand) {
+        openModal(targetBrand, targetIndex);
+      }
+    }
+
+    function openModal(brandObj, initialBranchIndex = 0) {
+      state.currentModalBrand = brandObj;
+      state.currentModalSelectedBranchIndex = initialBranchIndex;
+
+      const isZh = state.lang === 'zh';
+      const isPhysical = state.storeType === 'physical';
+      const catConfig = getCategoryConfig(brandObj.category_en, brandObj.category_zh);
+
+      document.getElementById('modal-category').innerText = isZh ? catConfig.zh : catConfig.en;
+      document.getElementById('modal-category').style.backgroundColor = catConfig.color;
+      document.getElementById('modal-category').style.color = '#ffffff';
+
+      document.getElementById('modal-type').innerText = isPhysical ? (isZh ? '實體門市' : 'Physical Store') : (isZh ? '網上商店' : 'Online Store');
+
+      document.getElementById('modal-brand-primary').innerText = isZh ? (brandObj.brand_zh || brandObj.brand_en) : (brandObj.brand_en || brandObj.brand_zh);
+      document.getElementById('modal-brand-secondary').innerText = isZh ? (brandObj.brand_en || '') : (brandObj.brand_zh || '');
+
+      document.getElementById('modal-discount').innerText = processLinebreaks(isZh ? (brandObj.discount_details_zh || brandObj.discount_details_en) : (brandObj.discount_details_en || brandObj.discount_details_zh));
+
+      // Branch tabs for physical multi-branch stores
+      const branchContainer = document.getElementById('modal-branch-container');
+      const branchPills = document.getElementById('modal-branch-pills');
+
+      if (isPhysical && brandObj.branches && brandObj.branches.length > 0) {
+        branchContainer.classList.remove('hidden');
+        document.getElementById('modal-branch-count').innerText = i18n[state.lang].branchCount(brandObj.branches.length);
+
+        branchPills.innerHTML = brandObj.branches.map((b, idx) => {
+          const isSelected = idx === state.currentModalSelectedBranchIndex;
+          const areaName = extractAreaName(b.address_en, b.address_zh, isZh);
+          const tabLabel = i18n[state.lang].branchTabName(idx + 1, areaName);
+
+          return `
+            <button onclick="selectModalBranch(${idx})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition ${isSelected ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
+              <i class="fa-solid fa-location-dot mr-1 text-[10px]"></i>
+              <span>${tabLabel}</span>
+            </button>
+          `;
+        }).join('');
+      } else {
+        branchContainer.classList.add('hidden');
+      }
+
+      updateModalBranchInfo();
+
+      // Main Contact
+      const rowContact = document.getElementById('modal-row-contact');
+      if (brandObj.main_contact) {
+        rowContact.classList.remove('hidden');
+        document.getElementById('modal-contact').innerText = brandObj.main_contact;
+      } else {
+        rowContact.classList.add('hidden');
+      }
+
+      // Website links
+      const rowLinks = document.getElementById('modal-row-links');
+      if (brandObj.other_links) {
+        rowLinks.classList.remove('hidden');
+        const linkElem = document.getElementById('modal-links');
+        linkElem.href = brandObj.other_links;
+        linkElem.innerText = brandObj.other_links;
+      } else {
+        rowLinks.classList.add('hidden');
+      }
+
+      updateModalFavoriteButton();
+
+      const modal = document.getElementById('detail-modal');
+      modal.classList.remove('hidden');
+    }
+
+    function selectModalBranch(index) {
+      state.currentModalSelectedBranchIndex = index;
+      
+      const brandObj = state.currentModalBrand;
+      const isZh = state.lang === 'zh';
+      const branchPills = document.getElementById('modal-branch-pills');
+
+      if (brandObj && brandObj.branches) {
+        branchPills.innerHTML = brandObj.branches.map((b, idx) => {
+          const isSelected = idx === state.currentModalSelectedBranchIndex;
+          const areaName = extractAreaName(b.address_en, b.address_zh, isZh);
+          const tabLabel = i18n[state.lang].branchTabName(idx + 1, areaName);
+
+          return `
+            <button onclick="selectModalBranch(${idx})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition ${isSelected ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
+              <i class="fa-solid fa-location-dot mr-1 text-[10px]"></i>
+              <span>${tabLabel}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      updateModalBranchInfo();
+    }
+
+    function updateModalBranchInfo() {
+      const brandObj = state.currentModalBrand;
+      const isZh = state.lang === 'zh';
+      const isPhysical = state.storeType === 'physical';
+
+      const rowAddress = document.getElementById('modal-row-address');
+      const rowHours = document.getElementById('modal-row-hours');
+      const rowPhone = document.getElementById('modal-row-phone');
+
+      if (isPhysical && brandObj && brandObj.branches && brandObj.branches.length > 0) {
+        const branch = brandObj.branches[state.currentModalSelectedBranchIndex] || brandObj.branches[0];
+
+        // Address
+        rowAddress.classList.remove('hidden');
+        const addressText = processLinebreaks(isZh ? branch.address_zh : branch.address_en);
+        document.getElementById('modal-address').innerText = addressText || '--';
+
+        const mapsBtn = document.getElementById('modal-maps-link');
+        if (branch.lat && branch.lng) {
+          mapsBtn.href = `https://www.google.com/maps/search/?api=1&query=${branch.lat},${branch.lng}`;
+          mapsBtn.classList.remove('hidden');
+        } else {
+          mapsBtn.classList.add('hidden');
+        }
+
+        // Opening Hours
+        const hoursText = processLinebreaks(isZh ? branch.opening_hours_zh : branch.opening_hours_en);
+        if (hoursText) {
+          rowHours.classList.remove('hidden');
+          document.getElementById('modal-hours').innerText = hoursText;
+        } else {
+          rowHours.classList.add('hidden');
+        }
+
+        // Phone Number
+        if (branch.phone_number) {
+          rowPhone.classList.remove('hidden');
+          const phoneElem = document.getElementById('modal-phone');
+          phoneElem.innerText = branch.phone_number;
+          phoneElem.href = `tel:${branch.phone_number.replace(/\s+/g, '')}`;
+        } else {
+          rowPhone.classList.add('hidden');
+        }
+
+      } else {
+        // Online Store
+        rowAddress.classList.add('hidden');
+        rowHours.classList.add('hidden');
+
+        if (brandObj && brandObj.phone_number) {
+          rowPhone.classList.remove('hidden');
+          const phoneElem = document.getElementById('modal-phone');
+          phoneElem.innerText = brandObj.phone_number;
+          phoneElem.href = `tel:${brandObj.phone_number.replace(/\s+/g, '')}`;
+        } else {
+          rowPhone.classList.add('hidden');
+        }
+      }
+    }
+
+    function updateModalFavoriteButton() {
+      if (!state.currentModalBrand) return;
+
+      const itemId = state.storeType === 'physical' ? state.currentModalBrand.brand_id : state.currentModalBrand.id;
+      const favKey = `${state.storeType}_${itemId}`;
+      const isFav = state.favorites.includes(favKey);
+
+      const btn = document.getElementById('modal-fav-btn');
+      if (isFav) {
+        btn.innerHTML = `<i class="fa-solid fa-bookmark text-amber-500"></i><span>${i18n[state.lang].saved}</span>`;
+        btn.className = "px-4 py-2 rounded-xl border border-amber-400 bg-amber-50 dark:bg-amber-900/30 text-xs font-bold text-amber-800 dark:text-amber-300 transition flex items-center space-x-1.5";
+      } else {
+        btn.innerHTML = `<i class="fa-regular fa-bookmark"></i><span>${i18n[state.lang].saveToFavorites}</span>`;
+        btn.className = "px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center space-x-1.5";
+      }
+    }
+
+    function toggleCurrentModalFavorite() {
+      if (!state.currentModalBrand) return;
+      const itemId = state.storeType === 'physical' ? state.currentModalBrand.brand_id : state.currentModalBrand.id;
+      const favKey = `${state.storeType}_${itemId}`;
+      toggleFavorite(favKey, null);
+      updateModalFavoriteButton();
+    }
+
+    function closeModal() {
+      document.getElementById('detail-modal').classList.add('hidden');
+      state.currentModalBrand = null;
+    }
+
     /* ==========================================================================
        7. INITIALIZATION ON WINDOW LOAD
        ========================================================================== */
     window.onload = function() {
       applyLanguageTexts();
+      renderDistrictFilter();
       fetchWelfareData();
 
       window.addEventListener('keydown', (e) => {
