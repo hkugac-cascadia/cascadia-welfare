@@ -235,7 +235,7 @@
       <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div class="flex items-center space-x-2 text-slate-600 dark:text-slate-300">
           <i class="fa-solid fa-location-dot text-brand-600"></i>
-          <span data-i18n="mapGuide">Click on any store pin to inspect details and student discount terms.</span>
+          <span data-i18n="mapGuide">Click on any physical store branch pin to inspect details and student discount terms.</span>
         </div>
         <button onclick="recenterMap()" class="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-200 transition font-medium">
           <i class="fa-solid fa-crosshairs mr-1"></i> <span data-i18n="recenterMap">Center Hong Kong</span>
@@ -291,6 +291,17 @@
           </div>
         </div>
 
+        <!-- Branch Selector (For Physical Brands with Multiple Locations) -->
+        <div id="modal-branch-container" class="hidden space-y-2 border-b border-slate-100 dark:border-slate-700 pb-4">
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <span data-i18n="selectBranch">Select Branch Location:</span>
+            <span id="modal-branch-count" class="text-brand-600 dark:text-brand-400 font-bold"></span>
+          </div>
+          <div id="modal-branch-pills" class="flex flex-wrap gap-2">
+            <!-- Branch pill buttons generated dynamically -->
+          </div>
+        </div>
+
         <!-- Business Specifics Grid -->
         <div class="grid grid-cols-1 gap-4 text-sm">
 
@@ -330,7 +341,7 @@
             </div>
           </div>
 
-          <!-- Main Contact & Links -->
+          <!-- Main Contact -->
           <div id="modal-row-contact" class="flex items-start space-x-3">
             <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0 text-brand-600 dark:text-brand-400">
               <i class="fa-solid fa-envelope"></i>
@@ -400,7 +411,6 @@
       { id: 'LIFESTYLE', en: 'Lifestyle & Retail', zh: '零售', icon: 'fa-bag-shopping', color: '#4f46e5', bgLight: 'bg-indigo-100', textLight: 'text-indigo-800' }
     ];
 
-    // Helper: Find Category Configuration from raw DB strings
     function getCategoryConfig(catEn, catZh) {
       const rawEn = (catEn || '').toLowerCase().trim();
       const rawZh = (catZh || '').toLowerCase().trim();
@@ -421,7 +431,6 @@
       };
     }
 
-    // Helper: Text Linebreak Processing (Converts literal '\n' or '\\n' strings to clean breakable text and trims leading whitespace)
     function processLinebreaks(text) {
       if (!text) return '';
       return String(text).replace(/\\n/g, '\n').trim();
@@ -437,10 +446,12 @@
       favoritesOnly: false,
       favorites: JSON.parse(localStorage.getItem('cascadia_favs') || '[]'),
       
-      physicalStores: [],
+      physicalLocationsRaw: [], // Raw locations array for map view
+      physicalBrandsGrouped: [], // Grouped brands with branches for list view
       onlineStores: [],
       
-      currentModalItem: null
+      currentModalBrand: null,
+      currentModalSelectedBranchIndex: 0
     };
 
     // Dictionary for Localization
@@ -471,8 +482,11 @@
         noResultsTitle: "No Welfare Discounts Found",
         noResultsDesc: "Try clearing your search keyword or switching categories.",
         resetFilters: "Reset All Filters",
-        mapGuide: "Click on any store pin to inspect details and student discount terms.",
+        mapGuide: "Click on any physical store branch pin to inspect details and student discount terms.",
         recenterMap: "Center Hong Kong",
+        selectBranch: "Select Branch Location:",
+        branchCount: (count) => `${count} Branch${count > 1 ? 'es' : ''}`,
+        branchTabName: (num, name) => `Branch ${num}${name ? ': ' + name : ''}`,
         showingCount: (count) => `Showing ${count} discount entry/entries`
       },
       zh: {
@@ -501,14 +515,17 @@
         noResultsTitle: "未有找到相關學生福利",
         noResultsDesc: "請嘗試清除搜尋關鍵字，或切換其他分類標籤。",
         resetFilters: "重置所有篩選",
-        mapGuide: "點擊地圖上的地標即可查看店舖營業資訊及學生優惠詳情。",
+        mapGuide: "點擊地圖上的分店地標即可查看店舖營業資訊及學生優惠詳情。",
         recenterMap: "重置地圖至香港",
+        selectBranch: "選擇分店門市：",
+        branchCount: (count) => `${count} 間分店`,
+        branchTabName: (num, name) => `分店 ${num}${name ? ': ' + name : ''}`,
         showingCount: (count) => `顯示 ${count} 個福利項目`
       }
     };
 
     /* ==========================================================================
-       2. MOCK DATA FALLBACK (With Updated Categories & Multi-line strings)
+       2. MOCK DATA FALLBACK (With Multi-Branch Example)
        ========================================================================== */
     const mockPhysicalStores = [
       {
@@ -529,6 +546,25 @@
         lng: 114.1578,
         opening_hours_zh: "星期一至六: 07:30 - 20:00\n星期日及公眾假期: 09:00 - 18:00",
         opening_hours_en: "Mon-Sat: 07:30 - 20:00\nSun & Public Holidays: 09:00 - 18:00"
+      },
+      {
+        location_id: 1012,
+        brand_id: 1,
+        brand_en: "Pacific Coffee",
+        brand_zh: "太平洋咖啡",
+        category_en: "Food & Beverage",
+        category_zh: "食品與飲料",
+        main_contact: "enquiry@pacificcoffee.com",
+        other_links: "https://www.pacificcoffee.com",
+        discount_details_zh: "出示學生證購買任何手調飲品即享 15% 折扣優惠。\n註：不適用於瓶裝飲料及推廣套餐。",
+        discount_details_en: "15% off handcrafted beverages with valid Student ID.\nNote: Not applicable to bottled drinks or promotional set menus.",
+        phone_number: "2810 0088",
+        address_zh: "銅鑼灣勿地臣街1號\n時代廣場地庫B215號舖",
+        address_en: "Shop B215, Times Square,\n1 Matheson Street, Causeway Bay",
+        lat: 22.2783,
+        lng: 114.1822,
+        opening_hours_zh: "星期一至日: 08:00 - 21:00",
+        opening_hours_en: "Mon-Sun: 08:00 - 21:00"
       },
       {
         location_id: 102,
@@ -618,6 +654,42 @@
       }
     ];
 
+    // Helper: Group physical location entries by brand_id for list view aggregation
+    function groupPhysicalStoresByBrand(flatLocations) {
+      const brandMap = new Map();
+
+      flatLocations.forEach(loc => {
+        const brandId = loc.brand_id || loc.location_id;
+        if (!brandMap.has(brandId)) {
+          brandMap.set(brandId, {
+            brand_id: brandId,
+            brand_en: loc.brand_en,
+            brand_zh: loc.brand_zh,
+            category_en: loc.category_en,
+            category_zh: loc.category_zh,
+            main_contact: loc.main_contact,
+            other_links: loc.other_links,
+            discount_details_zh: loc.discount_details_zh,
+            discount_details_en: loc.discount_details_en,
+            branches: []
+          });
+        }
+
+        brandMap.get(brandId).branches.push({
+          location_id: loc.location_id,
+          phone_number: loc.phone_number,
+          address_zh: loc.address_zh,
+          address_en: loc.address_en,
+          lat: loc.lat,
+          lng: loc.lng,
+          opening_hours_zh: loc.opening_hours_zh,
+          opening_hours_en: loc.opening_hours_en
+        });
+      });
+
+      return Array.from(brandMap.values());
+    }
+
     /* ==========================================================================
        3. MAP INITIALIZATION & CATEGORY PIN RENDERER
        ========================================================================== */
@@ -627,9 +699,7 @@
     function initMap() {
       if (mapInstance) return;
 
-      // Center map around Hong Kong
       mapInstance = L.map('map', { zoomControl: false }).setView([22.3193, 114.1694], 11);
-      
       L.control.zoom({ position: 'topright' }).addTo(mapInstance);
 
       L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
@@ -644,7 +714,6 @@
       }
     }
 
-    // Generate Custom Category Leaflet Marker Icon
     function createCategoryMarkerIcon(catConfig) {
       return L.divIcon({
         className: 'custom-leaflet-marker',
@@ -662,7 +731,6 @@
     function updateMapMarkers(locations) {
       if (!mapInstance) return;
 
-      // Clear existing pins
       mapMarkers.forEach(m => mapInstance.removeLayer(m));
       mapMarkers = [];
 
@@ -689,7 +757,7 @@
             <h4 class="font-extrabold text-slate-800 text-sm leading-tight mb-1">${brandName}</h4>
             <p class="text-xs text-slate-500 mb-2 whitespace-pre-line line-clamp-2"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i>${address}</p>
             <div class="bg-amber-50 border border-amber-200 text-amber-900 text-xs p-2 rounded-lg font-medium mb-3 whitespace-pre-line leading-relaxed">${discount}</div>
-            <button onclick="openModalById(${loc.location_id}, 'physical')" class="w-full py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg transition shadow-sm">
+            <button onclick="openModalByBrandId(${loc.brand_id}, ${loc.location_id})" class="w-full py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg transition shadow-sm">
               ${i18n[state.lang].viewDetails}
             </button>
           </div>
@@ -711,9 +779,9 @@
         ]);
 
         if (resPhysical.ok) {
-          state.physicalStores = await resPhysical.json();
+          state.physicalLocationsRaw = await resPhysical.json();
         } else {
-          state.physicalStores = mockPhysicalStores;
+          state.physicalLocationsRaw = mockPhysicalStores;
         }
 
         if (resOnline.ok) {
@@ -724,49 +792,69 @@
 
       } catch (err) {
         console.warn('Network issue, activating local fallback data:', err);
-        state.physicalStores = mockPhysicalStores;
+        state.physicalLocationsRaw = mockPhysicalStores;
         state.onlineStores = mockOnlineStores;
       }
 
-      // Update Counts
-      document.getElementById('badge-physical-count').innerText = state.physicalStores.length;
+      state.physicalBrandsGrouped = groupPhysicalStoresByBrand(state.physicalLocationsRaw);
+
+      document.getElementById('badge-physical-count').innerText = state.physicalBrandsGrouped.length;
       document.getElementById('badge-online-count').innerText = state.onlineStores.length;
 
       renderCategoryFilter();
       renderCurrentView();
     }
 
-    /* ==========================================================================
-       5. FILTERING & RENDERING ENGINE
-       ========================================================================== */
     function getFilteredData() {
-      const raw = state.storeType === 'physical' ? state.physicalStores : state.onlineStores;
+      const isPhysical = state.storeType === 'physical';
       const q = state.searchQuery.trim().toLowerCase();
 
+      if (state.view === 'map') {
+        // Map View always uses raw physical branch locations
+        return state.physicalLocationsRaw.filter(loc => {
+          if (state.selectedCategoryId !== 'ALL') {
+            const itemCatConfig = getCategoryConfig(loc.category_en, loc.category_zh);
+            if (itemCatConfig.id !== state.selectedCategoryId) return false;
+          }
+          if (state.favoritesOnly) {
+            const key = `physical_${loc.brand_id}`;
+            if (!state.favorites.includes(key)) return false;
+          }
+          if (q) {
+            const haystack = [loc.brand_en, loc.brand_zh, loc.discount_details_en, loc.discount_details_zh, loc.address_en, loc.address_zh].filter(Boolean).join(' ').toLowerCase();
+            if (!haystack.includes(q)) return false;
+          }
+          return true;
+        });
+      }
+
+      // List View uses grouped brands for physical or online stores
+      const raw = isPhysical ? state.physicalBrandsGrouped : state.onlineStores;
+
       return raw.filter(item => {
-        // Category Filter
         if (state.selectedCategoryId !== 'ALL') {
           const itemCatConfig = getCategoryConfig(item.category_en, item.category_zh);
           if (itemCatConfig.id !== state.selectedCategoryId) return false;
         }
 
-        // Favorites Filter
         if (state.favoritesOnly) {
-          const key = `${state.storeType}_${item.location_id || item.id}`;
+          const key = `${state.storeType}_${item.brand_id || item.id}`;
           if (!state.favorites.includes(key)) return false;
         }
 
-        // Search Filter
         if (q) {
+          let branchText = '';
+          if (item.branches) {
+            branchText = item.branches.map(b => `${b.address_en} ${b.address_zh}`).join(' ');
+          }
           const searchHaystack = [
             item.brand_en,
             item.brand_zh,
             item.discount_details_en,
             item.discount_details_zh,
-            item.address_en,
-            item.address_zh,
             item.category_en,
-            item.category_zh
+            item.category_zh,
+            branchText
           ].filter(Boolean).join(' ').toLowerCase();
 
           if (!searchHaystack.includes(q)) return false;
@@ -826,7 +914,7 @@
       const isZh = state.lang === 'zh';
 
       grid.innerHTML = items.map(item => {
-        const itemId = item.location_id || item.id;
+        const itemId = item.brand_id || item.id;
         const key = `${state.storeType}_${itemId}`;
         const isFav = state.favorites.includes(key);
 
@@ -836,15 +924,27 @@
         const brandPrimary = isZh ? item.brand_zh : item.brand_en;
         const brandSecondary = isZh ? item.brand_en : item.brand_zh;
         
-        // Process linebreaks for discount and location
         const discount = processLinebreaks(isZh ? item.discount_details_zh : item.discount_details_en);
-        const locationText = processLinebreaks(state.storeType === 'physical' ? (isZh ? item.address_zh : item.address_en) : (item.other_links || 'Online Platform'));
+
+        let locationText = '';
+        let branchBadge = '';
+
+        if (state.storeType === 'physical') {
+          const count = item.branches ? item.branches.length : 1;
+          branchBadge = `<span class="px-2 py-0.5 rounded-md bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 font-bold text-[10px]"><i class="fa-solid fa-store mr-1"></i>${i18n[state.lang].branchCount(count)}</span>`;
+          
+          if (item.branches && item.branches.length > 0) {
+            locationText = processLinebreaks(isZh ? item.branches[0].address_zh : item.branches[0].address_en);
+            if (count > 1) locationText += ` (+${count - 1} more)`;
+          }
+        } else {
+          locationText = processLinebreaks(item.other_links || 'Online Platform');
+        }
 
         return `
           <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition flex flex-col justify-between group">
             
             <div>
-              <!-- Card Top Row: Category Pill with Custom Icon & Favorite -->
               <div class="flex items-center justify-between mb-3">
                 <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-bold ${catConfig.bgLight} ${catConfig.textLight}">
                   <i class="fa-solid ${catConfig.icon}"></i>
@@ -855,13 +955,16 @@
                 </button>
               </div>
 
-              <!-- Brand Title -->
-              <h3 class="font-extrabold text-base text-slate-900 dark:text-white group-hover:text-brand-600 transition leading-snug">
-                ${brandPrimary}
-              </h3>
-              <p class="text-xs text-slate-400 font-medium mb-3">${brandSecondary}</p>
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h3 class="font-extrabold text-base text-slate-900 dark:text-white group-hover:text-brand-600 transition leading-snug">
+                    ${brandPrimary}
+                  </h3>
+                  <p class="text-xs text-slate-400 font-medium mb-2">${brandSecondary}</p>
+                </div>
+                ${branchBadge}
+              </div>
 
-              <!-- Discount Preview Box with linebreaks preserved -->
               <div class="bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 rounded-xl p-3 mb-4">
                 <div class="flex items-start space-x-2">
                   <i class="fa-solid fa-gift text-amber-500 text-sm mt-0.5 shrink-0"></i>
@@ -870,14 +973,13 @@
               </div>
             </div>
 
-            <!-- Card Bottom Row -->
             <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-700/50">
               <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center space-x-1.5 truncate">
                 <i class="${state.storeType === 'physical' ? 'fa-solid fa-location-dot text-red-400' : 'fa-solid fa-globe text-brand-400'} shrink-0"></i>
                 <span class="truncate whitespace-pre-line">${locationText}</span>
               </div>
 
-              <button onclick="openModalById(${itemId}, '${state.storeType}')" class="w-full py-2 bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition duration-200 flex items-center justify-center space-x-1.5">
+              <button onclick="openModalByBrandId(${itemId})" class="w-full py-2 bg-slate-100 dark:bg-slate-700 hover:bg-brand-600 hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition duration-200 flex items-center justify-center space-x-1.5">
                 <span>${i18n[state.lang].viewDetails}</span>
                 <i class="fa-solid fa-chevron-right text-[10px]"></i>
               </button>
@@ -889,69 +991,75 @@
     }
 
     /* ==========================================================================
-       6. MODAL & DETAIL DRAWER LOGIC
+       5. MODAL & DETAIL DRAWER LOGIC
        ========================================================================== */
-    function openModalById(id, type) {
-      const list = type === 'physical' ? state.physicalStores : state.onlineStores;
-      const item = list.find(i => (i.location_id || i.id) === id);
-      if (!item) return;
-
-      state.currentModalItem = { ...item, type };
+    function openModalByBrandId(brandId, targetLocationId = null) {
       const isZh = state.lang === 'zh';
-      const catConfig = getCategoryConfig(item.category_en, item.category_zh);
+      let brandObj = null;
 
-      // Category Pill
+      if (state.storeType === 'physical') {
+        brandObj = state.physicalBrandsGrouped.find(b => b.brand_id === brandId);
+      } else {
+        brandObj = state.onlineStores.find(s => s.id === brandId);
+      }
+
+      if (!brandObj) return;
+
+      state.currentModalBrand = brandObj;
+      state.currentModalSelectedBranchIndex = 0;
+
+      // If targeted location ID is specified (e.g. from map popup)
+      if (targetLocationId && brandObj.branches) {
+        const idx = brandObj.branches.findIndex(b => b.location_id === targetLocationId);
+        if (idx !== -1) state.currentModalSelectedBranchIndex = idx;
+      }
+
+      const catConfig = getCategoryConfig(brandObj.category_en, brandObj.category_zh);
+
       const catElem = document.getElementById('modal-category');
       catElem.innerText = isZh ? catConfig.zh : catConfig.en;
       catElem.className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${catConfig.bgLight} ${catConfig.textLight}`;
 
-      document.getElementById('modal-type').innerText = type === 'physical' ? (isZh ? '實體店' : 'Physical Store') : (isZh ? '網店' : 'Online Store');
+      document.getElementById('modal-type').innerText = state.storeType === 'physical' ? (isZh ? '實體店' : 'Physical Store') : (isZh ? '網店' : 'Online Store');
       
-      document.getElementById('modal-brand-primary').innerText = isZh ? item.brand_zh : item.brand_en;
-      document.getElementById('modal-brand-secondary').innerText = isZh ? item.brand_en : item.brand_zh;
+      document.getElementById('modal-brand-primary').innerText = isZh ? brandObj.brand_zh : brandObj.brand_en;
+      document.getElementById('modal-brand-secondary').innerText = isZh ? brandObj.brand_en : brandObj.brand_zh;
 
-      // Discount Details with Linebreak detection
-      document.getElementById('modal-discount').innerText = processLinebreaks(isZh ? item.discount_details_zh : item.discount_details_en);
+      document.getElementById('modal-discount').innerText = processLinebreaks(isZh ? brandObj.discount_details_zh : brandObj.discount_details_en);
 
-      // Handle Physical specific rows
-      const rowAddress = document.getElementById('modal-row-address');
-      const rowHours = document.getElementById('modal-row-hours');
+      // Render branch selector if multiple physical branches exist
+      const branchContainer = document.getElementById('modal-branch-container');
+      const branchPills = document.getElementById('modal-branch-pills');
 
-      if (type === 'physical') {
-        rowAddress.classList.remove('hidden');
-        rowHours.classList.remove('hidden');
+      if (state.storeType === 'physical' && brandObj.branches && brandObj.branches.length > 0) {
+        branchContainer.classList.remove('hidden');
+        document.getElementById('modal-branch-count').innerText = i18n[state.lang].branchCount(brandObj.branches.length);
 
-        const addr = processLinebreaks(isZh ? item.address_zh : item.address_en);
-        document.getElementById('modal-address').innerText = addr || '--';
-        
-        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
-        document.getElementById('modal-maps-link').href = mapUrl;
+        branchPills.innerHTML = brandObj.branches.map((b, idx) => {
+          const isSelected = idx === state.currentModalSelectedBranchIndex;
+          const shortAddr = (isZh ? b.address_zh : b.address_en).split('\n')[0].substring(0, 15);
+          const tabLabel = i18n[state.lang].branchTabName(idx + 1, shortAddr);
 
-        const hours = processLinebreaks(isZh ? item.opening_hours_zh : item.opening_hours_en);
-        document.getElementById('modal-hours').innerText = hours || '--';
+          return `
+            <button onclick="selectModalBranch(${idx})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition ${isSelected ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
+              <i class="fa-solid fa-location-dot mr-1 text-[10px]"></i>
+              <span>${tabLabel}</span>
+            </button>
+          `;
+        }).join('');
       } else {
-        rowAddress.classList.add('hidden');
-        rowHours.classList.add('hidden');
+        branchContainer.classList.add('hidden');
       }
 
-      // Phone
-      const phoneElem = document.getElementById('modal-phone');
-      if (item.phone_number) {
-        phoneElem.innerText = item.phone_number;
-        phoneElem.href = `tel:${item.phone_number.replace(/\s+/g, '')}`;
-      } else {
-        phoneElem.innerText = '--';
-        phoneElem.removeAttribute('href');
-      }
+      updateModalBranchInfo();
 
-      // Contact
-      document.getElementById('modal-contact').innerText = item.main_contact || '--';
+      // Contact & Links
+      document.getElementById('modal-contact').innerText = brandObj.main_contact || '--';
 
-      // Links
       const linksElem = document.getElementById('modal-links');
-      if (item.other_links) {
-        linksElem.innerText = item.other_links;
-        linksElem.href = item.other_links.startsWith('http') ? item.other_links : `https://${item.other_links}`;
+      if (brandObj.other_links) {
+        linksElem.innerText = brandObj.other_links;
+        linksElem.href = brandObj.other_links.startsWith('http') ? brandObj.other_links : `https://${brandObj.other_links}`;
       } else {
         linksElem.innerText = '--';
         linksElem.removeAttribute('href');
@@ -961,14 +1069,83 @@
       document.getElementById('detail-modal').classList.remove('hidden');
     }
 
+    function selectModalBranch(index) {
+      state.currentModalSelectedBranchIndex = index;
+      
+      const brandObj = state.currentModalBrand;
+      const isZh = state.lang === 'zh';
+      const branchPills = document.getElementById('modal-branch-pills');
+
+      if (brandObj && brandObj.branches) {
+        branchPills.innerHTML = brandObj.branches.map((b, idx) => {
+          const isSelected = idx === state.currentModalSelectedBranchIndex;
+          const shortAddr = (isZh ? b.address_zh : b.address_en).split('\n')[0].substring(0, 15);
+          const tabLabel = i18n[state.lang].branchTabName(idx + 1, shortAddr);
+
+          return `
+            <button onclick="selectModalBranch(${idx})" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition ${isSelected ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}">
+              <i class="fa-solid fa-location-dot mr-1 text-[10px]"></i>
+              <span>${tabLabel}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      updateModalBranchInfo();
+    }
+
+    function updateModalBranchInfo() {
+      const brandObj = state.currentModalBrand;
+      const isZh = state.lang === 'zh';
+
+      const rowAddress = document.getElementById('modal-row-address');
+      const rowHours = document.getElementById('modal-row-hours');
+      const phoneElem = document.getElementById('modal-phone');
+
+      if (state.storeType === 'physical' && brandObj && brandObj.branches && brandObj.branches.length > 0) {
+        rowAddress.classList.remove('hidden');
+        rowHours.classList.remove('hidden');
+
+        const activeBranch = brandObj.branches[state.currentModalSelectedBranchIndex] || brandObj.branches[0];
+
+        const addr = processLinebreaks(isZh ? activeBranch.address_zh : activeBranch.address_en);
+        document.getElementById('modal-address').innerText = addr || '--';
+        
+        const mapUrl = `https://www.google.com/maps/search/?api=1&query=${activeBranch.lat},${activeBranch.lng}`;
+        document.getElementById('modal-maps-link').href = mapUrl;
+
+        const hours = processLinebreaks(isZh ? activeBranch.opening_hours_zh : activeBranch.opening_hours_en);
+        document.getElementById('modal-hours').innerText = hours || '--';
+
+        if (activeBranch.phone_number) {
+          phoneElem.innerText = activeBranch.phone_number;
+          phoneElem.href = `tel:${activeBranch.phone_number.replace(/\s+/g, '')}`;
+        } else {
+          phoneElem.innerText = '--';
+          phoneElem.removeAttribute('href');
+        }
+      } else {
+        rowAddress.classList.add('hidden');
+        rowHours.classList.add('hidden');
+
+        if (brandObj && brandObj.phone_number) {
+          phoneElem.innerText = brandObj.phone_number;
+          phoneElem.href = `tel:${brandObj.phone_number.replace(/\s+/g, '')}`;
+        } else {
+          phoneElem.innerText = '--';
+          phoneElem.removeAttribute('href');
+        }
+      }
+    }
+
     function closeModal() {
       document.getElementById('detail-modal').classList.add('hidden');
-      state.currentModalItem = null;
+      state.currentModalBrand = null;
     }
 
     function updateModalFavBtn() {
-      if (!state.currentModalItem) return;
-      const key = `${state.currentModalItem.type}_${state.currentModalItem.location_id || state.currentModalItem.id}`;
+      if (!state.currentModalBrand) return;
+      const key = `${state.storeType}_${state.currentModalBrand.brand_id || state.currentModalBrand.id}`;
       const isFav = state.favorites.includes(key);
       const btn = document.getElementById('modal-fav-btn');
 
@@ -982,21 +1159,23 @@
     }
 
     function toggleCurrentModalFavorite() {
-      if (!state.currentModalItem) return;
-      const key = `${state.currentModalItem.type}_${state.currentModalItem.location_id || state.currentModalItem.id}`;
+      if (!state.currentModalBrand) return;
+      const key = `${state.storeType}_${state.currentModalBrand.brand_id || state.currentModalBrand.id}`;
       toggleFavorite(key);
       updateModalFavBtn();
     }
 
     /* ==========================================================================
-       7. INTERACTION HANDLERS & EVENT LISTENERS
+       6. INTERACTION HANDLERS & EVENT LISTENERS
        ========================================================================== */
     function switchView(viewName) {
-      if (viewName === 'map' && state.storeType === 'online') {
-        return; // Block map view for online stores
-      }
-
       state.view = viewName;
+
+      // In Map view, ensure physical stores mode is active
+      if (viewName === 'map' && state.storeType === 'online') {
+        state.storeType = 'physical';
+        updateStoreTypeUI();
+      }
 
       const btnList = document.getElementById('btn-view-list');
       const btnMap = document.getElementById('btn-view-map');
@@ -1005,9 +1184,7 @@
 
       if (viewName === 'list') {
         btnList.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm";
-        btnMap.className = state.storeType === 'online' 
-          ? "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 text-slate-300 dark:text-slate-600 opacity-50 cursor-not-allowed"
-          : "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 text-slate-600 dark:text-slate-300 hover:text-brand-600";
+        btnMap.className = "px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all duration-200 text-slate-600 dark:text-slate-300 hover:text-brand-600";
         viewList.classList.remove('hidden');
         viewMap.classList.add('hidden');
       } else {
@@ -1029,30 +1206,27 @@
       state.storeType = type;
       state.selectedCategoryId = 'ALL';
 
+      // If switching to Online Stores while in Map View, automatically revert to List View
+      if (type === 'online' && state.view === 'map') {
+        switchView('list');
+      } else {
+        updateStoreTypeUI();
+        renderCategoryFilter();
+        renderCurrentView();
+      }
+    }
+
+    function updateStoreTypeUI() {
       const btnPhys = document.getElementById('tab-type-physical');
       const btnOnl = document.getElementById('tab-type-online');
-      const btnMap = document.getElementById('btn-view-map');
 
-      if (type === 'physical') {
+      if (state.storeType === 'physical') {
         btnPhys.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center space-x-1.5";
         btnOnl.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-brand-600 flex items-center space-x-1.5";
-        btnMap.classList.remove('opacity-50', 'cursor-not-allowed', 'text-slate-300');
-        btnMap.classList.add('text-slate-600');
-        btnMap.title = "";
       } else {
         btnOnl.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400 shadow-sm flex items-center space-x-1.5";
         btnPhys.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-brand-600 flex items-center space-x-1.5";
-        btnMap.classList.add('opacity-50', 'cursor-not-allowed');
-        btnMap.title = "Map view is only available for physical stores";
-
-        // If currently on map view, switch to list view automatically
-        if (state.view === 'map') {
-          switchView('list');
-        }
       }
-
-      renderCategoryFilter();
-      renderCurrentView();
     }
 
     function setCategory(catId) {
@@ -1152,7 +1326,7 @@
     }
 
     /* ==========================================================================
-       8. INITIALIZATION ON WINDOW LOAD
+       7. INITIALIZATION ON WINDOW LOAD
        ========================================================================== */
     window.onload = function() {
       applyLanguageTexts();
