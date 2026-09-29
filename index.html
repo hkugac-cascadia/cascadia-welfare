@@ -423,7 +423,7 @@
       {
         regionEn: 'Kowloon', regionZh: '九龍',
         districts: [
-          { id: 'YAU_TSIM_MONG', en: 'Yau Tsim Mong', zh: '油尖旺區', keywords: ['mong kok', 'tsim sha tsui', 'yau ma tei', 'prince edward', 'jordan', 'austin', '旺角', '尖沙咀', '油麻地', '太子', '佐敦', '柯士甸'] },
+          { id: 'YAU_TSIM_MONG', en: 'Yau Tsim Mong', zh: '油尖旺區', keywords: ['mong kok', 'mongkok', 'tsim sha tsui', 'yau ma tei', 'prince edward', 'jordan', 'austin', '旺角', '尖沙咀', '油麻地', '太子', '佐敦', '柯士甸'] },
           { id: 'SHAM_SHUI_PO', en: 'Sham Shui Po', zh: '深水埗區', keywords: ['sham shui po', 'cheung sha wan', 'lai chi kok', 'shek kip mei', '深水埗', '長沙灣', '荔枝角', '石硤尾'] },
           { id: 'KOWLOON_CITY', en: 'Kowloon City', zh: '九龍城區', keywords: ['kowloon city', 'to kwa wan', 'ho man tin', 'kai tak', 'hung hom', 'whampoa', '九龍城', '土瓜灣', '何文田', '啟德', '紅磡', '黃埔'] },
           { id: 'WONG_TAI_SIN', en: 'Wong Tai Sin', zh: '黃大仙區', keywords: ['wong tai sin', 'diamond hill', 'lok fu', 'san po kong', 'tsz wan shan', '黃大仙', '鑽石山', '樂富', '新蒲崗', '慈雲山'] },
@@ -439,12 +439,34 @@
           { id: 'YUEN_LONG', en: 'Yuen Long', zh: '元朗區', keywords: ['yuen long', 'tin shui wai', '元朗', '天水圍'] },
           { id: 'NORTH', en: 'North', zh: '北區', keywords: ['sheung shui', 'fanling', '上水', '粉嶺'] },
           { id: 'TAI_PO', en: 'Tai Po', zh: '大埔區', keywords: ['tai po', '大埔'] },
-          { id: 'SHA_TIN', en: 'Sha Tin', zh: '沙田區', keywords: ['sha tin', 'tai wai', 'ma on shan', 'fo tan', '沙田', '大圍', '馬鞍山', '火炭'] },
+          { id: 'SHA_TIN', en: 'Sha Tin', zh: '沙田區', keywords: ['sha tin', 'shatin', 'tai wai', 'ma on shan', 'fo tan', '沙田', '大圍', '馬鞍山', '火炭'] },
           { id: 'SAI_KUNG', en: 'Sai Kung', zh: '西貢區', keywords: ['sai kung', 'tseung kwan o', 'hang hau', 'po lam', 'tiu keng leng', '西貢', '將軍澳', '坑口', '寶琳', '調景嶺'] },
           { id: 'ISLANDS', en: 'Islands', zh: '離島區', keywords: ['tung chung', 'discovery bay', 'lantau', 'lamma', 'cheung chau', '東涌', '愉景灣', '大嶼山', '南丫島', '長洲'] }
         ]
       }
     ];
+
+    // District Geographic Polygon Boundaries (Approximate coordinates for map highlight)
+    const DISTRICT_BOUNDARIES = {
+      CENTRAL_WESTERN: [[22.288, 114.120], [22.288, 114.162], [22.260, 114.162], [22.260, 114.120]],
+      WAN_CHAI: [[22.285, 114.168], [22.285, 114.195], [22.255, 114.195], [22.255, 114.168]],
+      EASTERN: [[22.295, 114.195], [22.295, 114.255], [22.255, 114.255], [22.255, 114.195]],
+      SOUTHERN: [[22.260, 114.110], [22.260, 114.260], [22.190, 114.260], [22.190, 114.110]],
+      YAU_TSIM_MONG: [[22.330, 114.155], [22.330, 114.180], [22.290, 114.180], [22.290, 114.155]],
+      SHAM_SHUI_PO: [[22.348, 114.135], [22.348, 114.170], [22.325, 114.170], [22.325, 114.135]],
+      KOWLOON_CITY: [[22.345, 114.175], [22.345, 114.205], [22.300, 114.205], [22.300, 114.175]],
+      WONG_TAI_SIN: [[22.365, 114.180], [22.365, 114.215], [22.335, 114.215], [22.335, 114.180]],
+      KWUN_TONG: [[22.340, 114.200], [22.340, 114.245], [22.285, 114.245], [22.285, 114.200]],
+      KWAI_TSING: [[22.375, 114.100], [22.375, 114.145], [22.335, 114.145], [22.335, 114.100]],
+      TSUEN_WAN: [[22.395, 114.040], [22.395, 114.130], [22.355, 114.130], [22.355, 114.040]],
+      TUEN_MUN: [[22.420, 113.930], [22.420, 114.010], [22.340, 114.010], [22.340, 113.930]],
+      YUEN_LONG: [[22.480, 113.980], [22.480, 114.110], [22.380, 114.110], [22.380, 113.980]],
+      NORTH: [[22.560, 114.080], [22.560, 114.250], [22.470, 114.250], [22.470, 114.080]],
+      TAI_PO: [[22.500, 114.120], [22.500, 114.330], [22.420, 114.330], [22.420, 114.120]],
+      SHA_TIN: [[22.430, 114.160], [22.430, 114.250], [22.350, 114.250], [22.350, 114.160]],
+      SAI_KUNG: [[22.410, 114.240], [22.410, 114.350], [22.280, 114.350], [22.280, 114.240]],
+      ISLANDS: [[22.330, 113.830], [22.330, 114.120], [22.150, 114.120], [22.150, 113.830]]
+    };
 
     // Canonical Category Mapping
     const CATEGORIES = [
@@ -524,57 +546,58 @@
         saved: "Bookmarked",
         close: "Close",
         allCategories: "All Categories",
-        allDistricts: "All HK Districts",
-        viewDetails: "View Details",
+        allDistricts: "All 18 Districts",
+        viewDetails: "View Details & Terms",
         noResultsTitle: "No Welfare Discounts Found",
-        noResultsDesc: "Try clearing your search keyword or switching categories/districts.",
+        noResultsDesc: "Try clearing your search keyword or switching categories.",
         resetFilters: "Reset All Filters",
-        mapGuide: "Click on any physical store branch pin to inspect details and student discount terms.",
         recenterMap: "Center Hong Kong",
+        mapGuide: "Click on any physical store branch pin to inspect details and student discount terms.",
         selectBranch: "Select Branch Location:",
-        branchCount: (count) => `${count} Branch${count > 1 ? 'es' : ''}`,
-        branchTabName: (num, name) => `Branch ${num}: ${name}`,
-        showingCount: (count) => `Showing ${count} discount entry/entries`
+        showingCount: (count) => `Showing ${count} discounts`,
+        branchCount: (count) => `${count} Branches`,
+        branchTabName: (idx, area) => `${area || `Branch ${idx}`}`
       },
       zh: {
-        headerSub: "港島民生書院學生會 外部福利平台",
-        viewList: "列表檢視",
-        viewMap: "地圖檢視",
-        heroBadge: "2026 年度官方學生福利",
-        heroTitle: "卡斯卡迪亞 學生專享外部折扣",
-        heroDesc: "於指定實體分店出示有效學生證，或於網店結帳時輸入獨家優惠碼，即可享全港各界學生專享優惠！",
-        typePhysical: "實體店鋪",
+        headerSub: "港大同學會書院學生福利平台",
+        viewList: "列表 View",
+        viewMap: "地圖 View",
+        heroBadge: "2026 官方學生福利",
+        heroTitle: "Cascadia 學生專屬商家折扣優惠",
+        heroDesc: "於指定實體店舖出示 HKUGAC 學生證，或於網上商店結帳時輸入獨家優惠碼，即可享全港專屬學生折扣優惠！",
+        typePhysical: "實體門市",
         typeOnline: "網上商店",
         savedOnly: "已收藏",
-        cloudConnected: "已即時連線 Cloudflare D1 資料庫",
-        discountDetails: "學生專享福利詳情",
-        addressLabel: "分店地址",
+        cloudConnected: "Cloudflare D1 資料庫同步中",
+        discountDetails: "學生專享福利優惠",
+        addressLabel: "門市地址",
         hoursLabel: "營業時間",
         phoneLabel: "聯絡電話",
-        contactLabel: "主要聯絡",
-        linksLabel: "官方網站 / 優惠連結",
+        contactLabel: "聯絡資訊",
+        linksLabel: "官方網站 / 推廣連結",
         openGoogleMaps: "於 Google 地圖開啟",
         saveToFavorites: "收藏此福利",
         saved: "已收藏",
         close: "關閉",
-        allCategories: "所有分類",
-        allDistricts: "全港所有地區",
-        viewDetails: "查看詳情",
-        noResultsTitle: "未有找到相關學生福利",
-        noResultsDesc: "請嘗試清除搜尋關鍵字，或切換其他地區及分類標籤。",
+        allCategories: "全部分類",
+        allDistricts: "全港十八區",
+        viewDetails: "檢視詳情與條款",
+        noResultsTitle: "未有找到相關學生優惠",
+        noResultsDesc: "請嘗試清除搜尋關鍵字或切換類別。",
         resetFilters: "重置所有篩選",
-        mapGuide: "點擊地圖上的分店地標即可查看店舖營業資訊及學生優惠詳情。",
-        recenterMap: "重置地圖至香港",
-        selectBranch: "選擇分店門市：",
+        recenterMap: "重置地圖中心",
+        mapGuide: "點擊任何實體門市地標可檢視詳細學生優惠條款及地址。",
+        selectBranch: "選擇門市分店：",
+        showingCount: (count) => `顯示 ${count} 個優惠`,
         branchCount: (count) => `${count} 間分店`,
-        branchTabName: (num, name) => `分店 ${num}: ${name}`,
-        showingCount: (count) => `顯示 ${count} 個福利項目`
+        branchTabName: (idx, area) => `${area || `分店 ${idx}`}`
       }
     };
 
-    /* Helper: Extract clean neighborhood/area name for branch tab pills */
+    /* Helper: Extract clean neighborhood/area name for branch tab pills & card summary */
     function extractAreaName(addressEn, addressZh, isZh) {
-      const textEn = (addressEn || '').toLowerCase();
+      const rawEn = addressEn || '';
+      const textEn = rawEn.toLowerCase();
       const textZh = addressZh || '';
 
       const AREAS = [
@@ -613,10 +636,19 @@
         }
       }
 
-      const fallback = isZh ? textZh.split('\n')[0] : textEn.split('\n')[0];
-      const parts = fallback.split(',');
-      const lastPart = parts[parts.length - 1].trim();
-      return lastPart.length > 0 && lastPart.length < 20 ? lastPart : fallback.substring(0, 15);
+      if (isZh) {
+        const fallbackZh = textZh.split('\n')[0].split(',')[0].trim();
+        return fallbackZh.substring(0, 15);
+      } else {
+        const lines = rawEn.split('\n');
+        const fallbackEn = lines[lines.length - 1] || lines[0] || '';
+        const parts = fallbackEn.split(',');
+        let lastPart = parts[parts.length - 1].trim();
+        if (lastPart.length > 0 && lastPart.length < 25) {
+          return lastPart.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+        }
+        return 'Branch Location';
+      }
     }
 
     /* Helper: Check if a branch is located inside the selected district */
@@ -631,7 +663,7 @@
 
       if (!targetDist) return true;
 
-      const haystack = `${branch.address_en || ''} ${branch.address_zh || ''}`.toLowerCase();
+      const haystack = `${branch.address_en || ''} ${branch.address_zh || ''} ${branch.district_id || ''}`.toLowerCase();
       return targetDist.keywords.some(kw => haystack.includes(kw.toLowerCase()));
     }
 
@@ -651,12 +683,12 @@
         discount_details_zh: "出示學生證購買任何手調飲品即享 15% 折扣優惠。\n註：不適用於瓶裝飲料及推廣套餐。",
         discount_details_en: "15% off handcrafted beverages with valid Student ID.\nNote: Not applicable to bottled drinks or promotional set menus.",
         phone_number: "2521 1868",
-        address_zh: "中環皇后大道中16-18號\n新世界大廈地下",
-        address_en: "G/F, New World Tower,\n16-18 Queen's Road Central, Central",
+        address_zh: "中環皇后大道中16-18號新世界大廈地下",
+        address_en: "G/F, New World Tower, 16-18 Queen's Road Central, Central",
         lat: 22.2815,
         lng: 114.1578,
-        opening_hours_zh: "星期一至六: 07:30 - 20:00\n星期日及公眾假期: 09:00 - 18:00",
-        opening_hours_en: "Mon-Sat: 07:30 - 20:00\nSun & Public Holidays: 09:00 - 18:00"
+        opening_hours_zh: "星期一至六: 07:30 - 20:00",
+        opening_hours_en: "Mon-Sat: 07:30 - 20:00"
       },
       {
         location_id: 1012,
@@ -670,12 +702,31 @@
         discount_details_zh: "出示學生證購買任何手調飲品即享 15% 折扣優惠。\n註：不適用於瓶裝飲料及推廣套餐。",
         discount_details_en: "15% off handcrafted beverages with valid Student ID.\nNote: Not applicable to bottled drinks or promotional set menus.",
         phone_number: "2810 0088",
-        address_zh: "銅鑼灣勿地臣街1號\n時代廣場地庫B215號舖",
-        address_en: "Shop B215, Times Square,\n1 Matheson Street, Causeway Bay",
+        address_zh: "銅鑼灣勿地臣街1號時代廣場地庫B215號舖",
+        address_en: "Shop B215, Times Square, 1 Matheson Street, Causeway Bay",
         lat: 22.2783,
         lng: 114.1822,
         opening_hours_zh: "星期一至日: 08:00 - 21:00",
         opening_hours_en: "Mon-Sun: 08:00 - 21:00"
+      },
+      {
+        location_id: 1013,
+        brand_id: 1,
+        brand_en: "Pacific Coffee",
+        brand_zh: "太平洋咖啡",
+        category_en: "Food & Beverage",
+        category_zh: "食品與飲料",
+        main_contact: "enquiry@pacificcoffee.com",
+        other_links: "https://www.pacificcoffee.com",
+        discount_details_zh: "出示學生證購買任何手調飲品即享 15% 折扣優惠。\n註：不適用於瓶裝飲料及推廣套餐。",
+        discount_details_en: "15% off handcrafted beverages with valid Student ID.\nNote: Not applicable to bottled drinks or promotional set menus.",
+        phone_number: "2601 2233",
+        address_zh: "沙田新城市廣場一期1樓108號舖",
+        address_en: "Shop 108, L1, New Town Plaza Phase 1, Sha Tin",
+        lat: 22.3812,
+        lng: 114.1889,
+        opening_hours_zh: "星期一至日: 08:00 - 22:00",
+        opening_hours_en: "Mon-Sun: 08:00 - 22:00"
       },
       {
         location_id: 102,
@@ -693,6 +744,25 @@
         address_en: "8-10/F, Hysan Place, 500 Hennessy Road, Causeway Bay",
         lat: 22.2799,
         lng: 114.1837,
+        opening_hours_zh: "星期一至日: 10:00 - 22:00",
+        opening_hours_en: "Mon-Sun: 10:00 - 22:00"
+      },
+      {
+        location_id: 1022,
+        brand_id: 2,
+        brand_en: "Eslite Bookstore",
+        brand_zh: "誠品書店",
+        category_en: "Education & Stationery",
+        category_zh: "教育與文具",
+        main_contact: "service@eslite.com.hk",
+        other_links: "https://www.eslite.com",
+        discount_details_zh: "1. 購買繁體中文書籍滿 HK$200 即享 10% 折扣\n2. 指定文具禮品享 12% 折扣",
+        discount_details_en: "1. 10% off Traditional Chinese books upon HK$200 spending\n2. 12% off selected stationery and gifts",
+        phone_number: "3419 6888",
+        address_zh: "沙田新城市廣場一期 2 樓 223 號舖",
+        address_en: "Shop 223, L2, New Town Plaza Phase 1, Sha Tin",
+        lat: 22.3816,
+        lng: 114.1882,
         opening_hours_zh: "星期一至日: 10:00 - 22:00",
         opening_hours_en: "Mon-Sun: 10:00 - 22:00"
       },
@@ -804,6 +874,7 @@
        ========================================================================== */
     let mapInstance = null;
     let mapMarkers = [];
+    let districtBoundaryLayer = null;
 
     function initMap() {
       if (mapInstance) return;
@@ -840,8 +911,29 @@
     function updateMapMarkers(locations) {
       if (!mapInstance) return;
 
+      // Clear existing markers
       mapMarkers.forEach(m => mapInstance.removeLayer(m));
       mapMarkers = [];
+
+      // Clear existing boundary polygon
+      if (districtBoundaryLayer) {
+        mapInstance.removeLayer(districtBoundaryLayer);
+        districtBoundaryLayer = null;
+      }
+
+      // Render District Boundary Highlight if district filter is active
+      if (state.selectedDistrict !== 'ALL' && DISTRICT_BOUNDARIES[state.selectedDistrict]) {
+        const polygonCoords = DISTRICT_BOUNDARIES[state.selectedDistrict];
+        districtBoundaryLayer = L.polygon(polygonCoords, {
+          color: '#0d9488',
+          weight: 3,
+          dashArray: '6, 6',
+          fillColor: '#14b8a6',
+          fillOpacity: 0.15
+        }).addTo(mapInstance);
+
+        mapInstance.fitBounds(districtBoundaryLayer.getBounds(), { padding: [30, 30] });
+      }
 
       const isZh = state.lang === 'zh';
 
@@ -1246,11 +1338,22 @@
 
         if (isPhysical && item.branches) {
           const bCount = item.branches.length;
-          branchBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"><i class="fa-solid fa-store mr-1"></i>${i18n[state.lang].branchCount(bCount)}</span>`;
-          
-          const firstBranch = item.branches[0];
-          const address = processLinebreaks(isZh ? firstBranch.address_zh : firstBranch.address_en);
-          locationPreview = `<div class="mt-2 text-xs text-slate-500 line-clamp-1"><i class="fa-solid fa-location-dot text-brand-600 mr-1"></i>${address}</div>`;
+          // Hide badge if only 1 branch
+          if (bCount > 1) {
+            branchBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"><i class="fa-solid fa-store mr-1"></i>${i18n[state.lang].branchCount(bCount)}</span>`;
+          }
+
+          // Format branch locations: Full address for 1 branch, consolidated list of area names for multiple branches
+          if (bCount === 1) {
+            const firstBranch = item.branches[0];
+            const address = processLinebreaks(isZh ? firstBranch.address_zh : firstBranch.address_en);
+            locationPreview = `<div class="mt-2 text-xs text-slate-500 line-clamp-1"><i class="fa-solid fa-location-dot text-brand-600 mr-1"></i>${address}</div>`;
+          } else {
+            const areas = item.branches.map(b => extractAreaName(b.address_en, b.address_zh, isZh));
+            const uniqueAreas = [...new Set(areas)];
+            const areaString = uniqueAreas.join(' • ');
+            locationPreview = `<div class="mt-2 text-xs text-slate-600 dark:text-slate-400 font-semibold line-clamp-1"><i class="fa-solid fa-store text-brand-600 mr-1.5"></i>${areaString}</div>`;
+          }
         }
 
         return `
@@ -1275,7 +1378,10 @@
 
               ${locationPreview}
 
-              <div class="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-line line-clamp-3"><i class="fa-solid fa-tags text-amber-500 mr-1.5"></i>${discountText}</div>
+              <!-- Fixed 2-line height discount privilege box -->
+              <div class="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-slate-800 dark:text-slate-100 leading-relaxed line-clamp-2 h-10 overflow-hidden">
+                <i class="fa-solid fa-tags text-amber-500 mr-1.5"></i>${discountText}
+              </div>
             </div>
 
             <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-xs font-bold text-brand-600 dark:text-brand-400">
