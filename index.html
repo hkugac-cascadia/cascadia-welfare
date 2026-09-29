@@ -121,7 +121,7 @@
             </button>
           </div>
 
-          <!-- Language Switcher Button (Compact "Eng" / "繁") -->
+          <!-- Language Switcher Button -->
           <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center space-x-1.5 shadow-sm">
             <i class="fa-solid fa-globe text-brand-500"></i>
             <span id="lang-indicator">繁</span>
@@ -311,7 +311,7 @@
           </div>
         </div>
 
-        <!-- Business Specifics Grid (Clean single fields) -->
+        <!-- Business Specifics Grid -->
         <div class="grid grid-cols-1 gap-4 text-sm">
 
           <!-- Address -->
@@ -446,28 +446,6 @@
       }
     ];
 
-    // District Geographic Polygon Boundaries (Approximate coordinates for map highlight)
-    const DISTRICT_BOUNDARIES = {
-      CENTRAL_WESTERN: [[22.288, 114.120], [22.288, 114.162], [22.260, 114.162], [22.260, 114.120]],
-      WAN_CHAI: [[22.285, 114.168], [22.285, 114.195], [22.255, 114.195], [22.255, 114.168]],
-      EASTERN: [[22.295, 114.195], [22.295, 114.255], [22.255, 114.255], [22.255, 114.195]],
-      SOUTHERN: [[22.260, 114.110], [22.260, 114.260], [22.190, 114.260], [22.190, 114.110]],
-      YAU_TSIM_MONG: [[22.330, 114.155], [22.330, 114.180], [22.290, 114.180], [22.290, 114.155]],
-      SHAM_SHUI_PO: [[22.348, 114.135], [22.348, 114.170], [22.325, 114.170], [22.325, 114.135]],
-      KOWLOON_CITY: [[22.345, 114.175], [22.345, 114.205], [22.300, 114.205], [22.300, 114.175]],
-      WONG_TAI_SIN: [[22.365, 114.180], [22.365, 114.215], [22.335, 114.215], [22.335, 114.180]],
-      KWUN_TONG: [[22.340, 114.200], [22.340, 114.245], [22.285, 114.245], [22.285, 114.200]],
-      KWAI_TSING: [[22.375, 114.100], [22.375, 114.145], [22.335, 114.145], [22.335, 114.100]],
-      TSUEN_WAN: [[22.395, 114.040], [22.395, 114.130], [22.355, 114.130], [22.355, 114.040]],
-      TUEN_MUN: [[22.420, 113.930], [22.420, 114.010], [22.340, 114.010], [22.340, 113.930]],
-      YUEN_LONG: [[22.480, 113.980], [22.480, 114.110], [22.380, 114.110], [22.380, 113.980]],
-      NORTH: [[22.560, 114.080], [22.560, 114.250], [22.470, 114.250], [22.470, 114.080]],
-      TAI_PO: [[22.500, 114.120], [22.500, 114.330], [22.420, 114.330], [22.420, 114.120]],
-      SHA_TIN: [[22.430, 114.160], [22.430, 114.250], [22.350, 114.250], [22.350, 114.160]],
-      SAI_KUNG: [[22.410, 114.240], [22.410, 114.350], [22.280, 114.350], [22.280, 114.240]],
-      ISLANDS: [[22.330, 113.830], [22.330, 114.120], [22.150, 114.120], [22.150, 113.830]]
-    };
-
     // Canonical Category Mapping
     const CATEGORIES = [
       { id: 'CULTURE', en: 'Culture & Media', zh: '文化與媒體', icon: 'fa-film', color: '#9333ea' },
@@ -497,7 +475,6 @@
       };
     }
 
-    /* Process multiline text to avoid leading empty lines */
     function processLinebreaks(text) {
       if (!text) return '';
       return String(text).replace(/\\n/g, '\n').trim();
@@ -505,9 +482,9 @@
 
     // Application state
     let state = {
-      lang: 'en', // 'en' | 'zh'
-      view: 'list', // 'list' | 'map'
-      storeType: 'physical', // 'physical' | 'online'
+      lang: 'en',
+      view: 'list',
+      storeType: 'physical',
       selectedCategoryId: 'ALL',
       selectedDistrict: 'ALL',
       searchQuery: '',
@@ -519,7 +496,10 @@
       onlineStores: [],
       
       currentModalBrand: null,
-      currentModalSelectedBranchIndex: 0
+      currentModalSelectedBranchIndex: 0,
+
+      // GeoJSON District Boundaries store
+      districtGeoJsonData: null
     };
 
     // Dictionary for Localization
@@ -594,7 +574,6 @@
       }
     };
 
-    /* Helper: Extract clean neighborhood/area name for branch tab pills & card summary */
     function extractAreaName(addressEn, addressZh, isZh) {
       const rawEn = addressEn || '';
       const textEn = rawEn.toLowerCase();
@@ -651,7 +630,6 @@
       }
     }
 
-    /* Helper: Check if a branch is located inside the selected district */
     function isBranchInDistrict(branch, districtId) {
       if (!districtId || districtId === 'ALL') return true;
 
@@ -748,25 +726,6 @@
         opening_hours_en: "Mon-Sun: 10:00 - 22:00"
       },
       {
-        location_id: 1022,
-        brand_id: 2,
-        brand_en: "Eslite Bookstore",
-        brand_zh: "誠品書店",
-        category_en: "Education & Stationery",
-        category_zh: "教育與文具",
-        main_contact: "service@eslite.com.hk",
-        other_links: "https://www.eslite.com",
-        discount_details_zh: "1. 購買繁體中文書籍滿 HK$200 即享 10% 折扣\n2. 指定文具禮品享 12% 折扣",
-        discount_details_en: "1. 10% off Traditional Chinese books upon HK$200 spending\n2. 12% off selected stationery and gifts",
-        phone_number: "3419 6888",
-        address_zh: "沙田新城市廣場一期 2 樓 223 號舖",
-        address_en: "Shop 223, L2, New Town Plaza Phase 1, Sha Tin",
-        lat: 22.3816,
-        lng: 114.1882,
-        opening_hours_zh: "星期一至日: 10:00 - 22:00",
-        opening_hours_en: "Mon-Sun: 10:00 - 22:00"
-      },
-      {
         location_id: 103,
         brand_id: 3,
         brand_en: "Broadway Cinema",
@@ -784,25 +743,6 @@
         lng: 114.1706,
         opening_hours_zh: "星期一至日: 11:30 - 23:30",
         opening_hours_en: "Mon-Sun: 11:30 - 23:30"
-      },
-      {
-        location_id: 104,
-        brand_id: 4,
-        brand_en: "Fortress Tech",
-        brand_zh: "豐澤電器",
-        category_en: "Gadgets & Electronics",
-        category_zh: "電子產品與工具",
-        main_contact: "fortress@aswatson.com",
-        other_links: "https://www.fortress.com.hk",
-        discount_details_zh: "購買指定手提電腦或平板電腦專享 5% 折扣，加送周邊配件禮包。",
-        discount_details_en: "5% off selected laptops or tablets + free accessories gift pack.",
-        phone_number: "2555 5788",
-        address_zh: "旺角彌敦道664號惠豐中心地下",
-        address_en: "G/F, Wai Fung Plaza, 664 Nathan Road, Mong Kok",
-        lat: 22.3193,
-        lng: 114.1694,
-        opening_hours_zh: "星期一至日: 11:00 - 21:30",
-        opening_hours_en: "Mon-Sun: 11:00 - 21:30"
       }
     ];
 
@@ -833,7 +773,6 @@
       }
     ];
 
-    // Helper: Group physical location entries by brand_id for list view aggregation
     function groupPhysicalStoresByBrand(flatLocations) {
       const brandMap = new Map();
 
@@ -870,11 +809,61 @@
     }
 
     /* ==========================================================================
-       3. MAP INITIALIZATION & CATEGORY PIN RENDERER
+       3. MAP & GEOJSON DISTRICT BOUNDARY RENDERER
        ========================================================================== */
     let mapInstance = null;
     let mapMarkers = [];
     let districtBoundaryLayer = null;
+
+    async function loadDistrictBoundariesGeoJSON() {
+      // Priority list of GitHub / standard HAD GeoJSON endpoints for hksar_18_district_boundary.json
+      const geojsonSources = [
+        'hksar_18_district_boundary.json',
+        './hksar_18_district_boundary.json',
+        'https://raw.githubusercontent.com/gogovan/hk-geojson/master/hksar_18_district_boundary.json',
+        'https://www.had.gov.hk/psi/hong-kong-administrative-boundaries/hksar_18_district_boundary.json'
+      ];
+
+      for (const src of geojsonSources) {
+        try {
+          const resp = await fetch(src);
+          if (resp.ok) {
+            const data = await resp.json();
+            if (data && (data.type === 'FeatureCollection' || Array.isArray(data.features))) {
+              state.districtGeoJsonData = data;
+              console.log('Successfully loaded district boundary GeoJSON from:', src);
+              break;
+            }
+          }
+        } catch (e) {
+          // Continue trying next source
+        }
+      }
+    }
+
+    function findDistrictFeatureInGeoJSON(geojson, districtId) {
+      if (!geojson || !geojson.features) return null;
+
+      let targetDist = null;
+      for (const reg of HK_DISTRICTS) {
+        const found = reg.districts.find(d => d.id === districtId);
+        if (found) { targetDist = found; break; }
+      }
+
+      if (!targetDist) return null;
+
+      return geojson.features.find(feature => {
+        const props = feature.properties || {};
+        const strProps = JSON.stringify(props).toLowerCase();
+        
+        // Match English name, Chinese name, or key district keywords
+        const zhMatch = targetDist.zh && strProps.includes(targetDist.zh.toLowerCase());
+        const enMatch = targetDist.en && strProps.includes(targetDist.en.toLowerCase().replace('&', 'and'));
+        const kwMatch = targetDist.keywords && targetDist.keywords.some(kw => strProps.includes(kw.toLowerCase()));
+
+        return zhMatch || enMatch || kwMatch;
+      });
+    }
 
     function initMap() {
       if (mapInstance) return;
@@ -911,28 +900,37 @@
     function updateMapMarkers(locations) {
       if (!mapInstance) return;
 
-      // Clear existing markers
+      // Clear existing store markers
       mapMarkers.forEach(m => mapInstance.removeLayer(m));
       mapMarkers = [];
 
-      // Clear existing boundary polygon
+      // Clear existing boundary polygon layer
       if (districtBoundaryLayer) {
         mapInstance.removeLayer(districtBoundaryLayer);
         districtBoundaryLayer = null;
       }
 
-      // Render District Boundary Highlight if district filter is active
-      if (state.selectedDistrict !== 'ALL' && DISTRICT_BOUNDARIES[state.selectedDistrict]) {
-        const polygonCoords = DISTRICT_BOUNDARIES[state.selectedDistrict];
-        districtBoundaryLayer = L.polygon(polygonCoords, {
-          color: '#0d9488',
-          weight: 3,
-          dashArray: '6, 6',
-          fillColor: '#14b8a6',
-          fillOpacity: 0.15
-        }).addTo(mapInstance);
+      // Render accurate GeoJSON boundary polygon if district filter is active
+      if (state.selectedDistrict !== 'ALL') {
+        let matchedFeature = null;
 
-        mapInstance.fitBounds(districtBoundaryLayer.getBounds(), { padding: [30, 30] });
+        if (state.districtGeoJsonData) {
+          matchedFeature = findDistrictFeatureInGeoJSON(state.districtGeoJsonData, state.selectedDistrict);
+        }
+
+        if (matchedFeature) {
+          districtBoundaryLayer = L.geoJSON(matchedFeature, {
+            style: {
+              color: '#0d9488',
+              weight: 3,
+              dashArray: '4, 6',
+              fillColor: '#14b8a6',
+              fillOpacity: 0.22
+            }
+          }).addTo(mapInstance);
+
+          mapInstance.fitBounds(districtBoundaryLayer.getBounds(), { padding: [30, 30] });
+        }
       }
 
       const isZh = state.lang === 'zh';
@@ -1338,12 +1336,10 @@
 
         if (isPhysical && item.branches) {
           const bCount = item.branches.length;
-          // Hide badge if only 1 branch
           if (bCount > 1) {
             branchBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"><i class="fa-solid fa-store mr-1"></i>${i18n[state.lang].branchCount(bCount)}</span>`;
           }
 
-          // Format branch locations: Full address for 1 branch, consolidated list of area names for multiple branches
           if (bCount === 1) {
             const firstBranch = item.branches[0];
             const address = processLinebreaks(isZh ? firstBranch.address_zh : firstBranch.address_en);
@@ -1378,9 +1374,9 @@
 
               ${locationPreview}
 
-              <!-- Fixed 2-line height discount privilege box -->
-              <div class="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-slate-800 dark:text-slate-100 leading-relaxed line-clamp-2 h-10 overflow-hidden">
-                <i class="fa-solid fa-tags text-amber-500 mr-1.5"></i>${discountText}
+              <!-- Extended height discount privilege preview box -->
+              <div class="mt-3 py-2.5 px-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-slate-800 dark:text-slate-100 leading-relaxed line-clamp-3 min-h-[4.5rem] flex items-center">
+                <div><i class="fa-solid fa-tags text-amber-500 mr-1.5 shrink-0"></i>${discountText}</div>
               </div>
             </div>
 
@@ -1608,6 +1604,7 @@
     window.onload = function() {
       applyLanguageTexts();
       renderDistrictFilter();
+      loadDistrictBoundariesGeoJSON();
       fetchWelfareData();
 
       window.addEventListener('keydown', (e) => {
