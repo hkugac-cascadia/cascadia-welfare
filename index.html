@@ -409,7 +409,7 @@
        ========================================================================== */
     const WORKER_BASE_URL = 'https://cascadia-welfare.typhoonnerd.workers.dev';
 
-    // HK 18 Administrative Districts Data (HAD Classification)
+    // HK 18 Administrative Districts Data (HAD Classification with comprehensive keywords)
     const HK_DISTRICTS = [
       {
         regionEn: 'Hong Kong Island', regionZh: '香港島',
@@ -423,24 +423,24 @@
       {
         regionEn: 'Kowloon', regionZh: '九龍',
         districts: [
-          { id: 'YAU_TSIM_MONG', en: 'Yau Tsim Mong', zh: '油尖旺區', keywords: ['yau tsim mong', 'yau_tsim_mong', 'mong kok', 'mongkok', 'tsim sha tsui', 'tst', 'yau ma tei', 'prince edward', 'jordan', 'austin', '油尖旺', '旺角', '尖沙咀', '油麻地', '太子', '佐敦', '柯士甸'] },
+          { id: 'YAU_TSIM_MONG', en: 'Yau Tsim Mong', zh: '油尖旺區', keywords: ['yau tsim mong', 'yau_tsim_mong', 'mong kok', 'mongkok', 'tsim sha tsui', 'tsimshatsui', 'tst', 'yau ma tei', 'prince edward', 'jordan', 'austin', '油尖旺', '旺角', '尖沙咀', '油麻地', '太子', '佐敦', '柯士甸'] },
           { id: 'SHAM_SHUI_PO', en: 'Sham Shui Po', zh: '深水埗區', keywords: ['sham shui po', 'sham_shui_po', 'cheung sha wan', 'lai chi kok', 'shek kip mei', 'mei foo', '深水埗', '長沙灣', '荔枝角', '石硤尾', '美孚'] },
           { id: 'KOWLOON_CITY', en: 'Kowloon City', zh: '九龍城區', keywords: ['kowloon city', 'kowloon_city', 'to kwa wan', 'ho man tin', 'kai tak', 'hung hom', 'whampoa', '九龍城', '土瓜灣', '何文田', '啟德', '紅磡', '黃埔'] },
           { id: 'WONG_TAI_SIN', en: 'Wong Tai Sin', zh: '黃大仙區', keywords: ['wong tai sin', 'wong_tai_sin', 'diamond hill', 'lok fu', 'san po kong', 'tsz wan shan', '黃大仙', '鑽石山', '樂富', '新蒲崗', '慈雲山'] },
-          { id: 'KWUN_TONG', en: 'Kwun Tong', zh: '觀塘區', keywords: ['kwun tong', 'kwun_tong', 'kowloon bay', 'ngau tau kok', 'yau tong', 'lam tin', '觀塘', '九龍灣', '牛頭角', '油塘', '藍田'] }
+          { id: 'KWUN_TONG', en: 'Kwun Tong', zh: '觀塘區', keywords: ['kwun tong', 'kwuntong', 'kwun_tong', 'kowloon bay', 'ngau tau kok', 'yau tong', 'lam tin', '觀塘', '九龍灣', '牛頭角', '油塘', '藍田'] }
         ]
       },
       {
         regionEn: 'New Territories & Islands', regionZh: '新界及離島',
         districts: [
           { id: 'KWAI_TSING', en: 'Kwai Tsing', zh: '葵青區', keywords: ['kwai tsing', 'kwai_tsing', 'kwai chung', 'tsing yi', 'kwai fong', '葵青', '葵涌', '青衣', '葵芳'] },
-          { id: 'TSUEN_WAN', en: 'Tsuen Wan', zh: '荃灣區', keywords: ['tsuen wan', 'tsuen_wan', 'sham tseng', '荃灣', '深井'] },
-          { id: 'TUEN_MUN', en: 'Tuen Mun', zh: '屯門區', keywords: ['tuen mun', 'tuen_mun', '屯門'] },
-          { id: 'YUEN_LONG', en: 'Yuen Long', zh: '元朗區', keywords: ['yuen long', 'yuen_long', 'tin shui wai', '元朗', '天水圍'] },
+          { id: 'TSUEN_WAN', en: 'Tsuen Wan', zh: '荃灣區', keywords: ['tsuen wan', 'tsuenwan', 'tsuen_wan', 'sham tseng', '荃灣', '深井'] },
+          { id: 'TUEN_MUN', en: 'Tuen Mun', zh: '屯門區', keywords: ['tuen mun', 'tuenmun', 'tuen_mun', '屯門'] },
+          { id: 'YUEN_LONG', en: 'Yuen Long', zh: '元朗區', keywords: ['yuen long', 'yuenlong', 'yuen_long', 'tin shui wai', '元朗', '天水圍'] },
           { id: 'NORTH', en: 'North', zh: '北區', keywords: ['north', 'sheung shui', 'fanling', '北區', '上水', '粉嶺'] },
-          { id: 'TAI_PO', en: 'Tai Po', zh: '大埔區', keywords: ['tai po', 'tai_po', '大埔'] },
-          { id: 'SHA_TIN', en: 'Sha Tin', zh: '沙田區', keywords: ['sha tin', 'shatin', 'sha_tin', 'tai wai', 'ma on shan', 'fo tan', '沙田', '大圍', '馬鞍山', '火炭'] },
-          { id: 'SAI_KUNG', en: 'Sai Kung', zh: '西貢區', keywords: ['sai kung', 'sai_kung', 'tseung kwan o', 'tko', 'hang hau', 'po lam', 'tiu keng leng', '西貢', '將軍澳', '坑口', '寶琳', '調景嶺'] },
+          { id: 'TAI_PO', en: 'Tai Po', zh: '大埔區', keywords: ['tai po', 'taipo', 'tai_po', '大埔'] },
+          { id: 'SHA_TIN', en: 'Sha Tin', zh: '沙田區', keywords: ['sha tin', 'shatin', 'sha_tin', 'shatin district', 'sha tin district', 'tai wai', 'ma on shan', 'fo tan', 'shek mun', 'siu lek yuen', '沙田', '大圍', '馬鞍山', '火炭', '石門', '小瀝源'] },
+          { id: 'SAI_KUNG', en: 'Sai Kung', zh: '西貢區', keywords: ['sai kung', 'saikung', 'sai_kung', 'tseung kwan o', 'tko', 'hang hau', 'po lam', 'tiu keng leng', '西貢', '將軍澳', '坑口', '寶琳', '調景嶺'] },
           { id: 'ISLANDS', en: 'Islands', zh: '離島區', keywords: ['islands', 'tung chung', 'discovery bay', 'lantau', 'lamma', 'cheung chau', '離島', '東涌', '愉景灣', '大嶼山', '南丫島', '長洲'] }
         ]
       }
@@ -585,6 +585,10 @@
         { en: 'Causeway Bay', zh: '銅鑼灣' },
         { en: 'Tsim Sha Tsui', zh: '尖沙咀' },
         { en: 'Sha Tin', zh: '沙田' },
+        { en: 'Tai Wai', zh: '大圍' },
+        { en: 'Ma On Shan', zh: '馬鞍山' },
+        { en: 'Fo Tan', zh: '火炭' },
+        { en: 'Shek Mun', zh: '石門' },
         { en: 'Wan Chai', zh: '灣仔' },
         { en: 'Kwun Tong', zh: '觀塘' },
         { en: 'Kowloon Bay', zh: '九龍灣' },
@@ -604,9 +608,7 @@
         { en: 'Admiralty', zh: '金鐘' },
         { en: 'Hung Hom', zh: '紅磡' },
         { en: 'Yau Ma Tei', zh: '油麻地' },
-        { en: 'Prince Edward', zh: '太子' },
-        { en: 'Tai Wai', zh: '大圍' },
-        { en: 'Ma On Shan', zh: '馬鞍山' }
+        { en: 'Prince Edward', zh: '太子' }
       ];
 
       for (const area of AREAS) {
@@ -645,25 +647,30 @@
       const targetEnNorm = targetDist.en.toLowerCase().replace(/[^a-z0-9]/g, '');
       const targetZh = targetDist.zh.toLowerCase();
 
-      // Check direct district metadata fields if provided by API or dataset
-      const branchDistId = String(branch.district_id || branch.district || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      const branchDistEn = String(branch.district_en || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      const branchDistZh = String(branch.district_zh || '').toLowerCase();
+      // Check direct district metadata fields if provided by D1 API or dataset
+      const branchDistId = String(branch.district_id || branch.districtId || branch.district || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const branchDistEn = String(branch.district_en || branch.districtEn || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const branchDistZh = String(branch.district_zh || branch.districtZh || '').toLowerCase();
 
-      if (branchDistId && (branchDistId === targetIdNorm || branchDistId === targetEnNorm)) return true;
-      if (branchDistEn && (branchDistEn === targetEnNorm || branchDistEn === targetIdNorm)) return true;
-      if (branchDistZh && branchDistZh.includes(targetZh)) return true;
+      if (branchDistId && (branchDistId === targetIdNorm || branchDistId === targetEnNorm || targetIdNorm.includes(branchDistId) || branchDistId.includes(targetIdNorm))) return true;
+      if (branchDistEn && (branchDistEn === targetEnNorm || branchDistEn === targetIdNorm || targetEnNorm.includes(branchDistEn))) return true;
+      if (branchDistZh && (branchDistZh.includes(targetZh) || targetZh.includes(branchDistZh))) return true;
 
-      // Construct exhaustive search text across all location attributes
+      // Construct search text across all location attributes
       const haystack = [
         branch.address_en,
         branch.address_zh,
         branch.district_id,
+        branch.districtId,
         branch.district_en,
+        branch.districtEn,
         branch.district_zh,
+        branch.districtZh,
         branch.district,
         branch.region_en,
-        branch.region_zh
+        branch.region_zh,
+        branch.location_name,
+        branch.name
       ].filter(Boolean).join(' ').toLowerCase();
 
       if (haystack.includes(targetDist.en.toLowerCase()) || haystack.includes(targetDist.zh.toLowerCase())) {
@@ -674,7 +681,7 @@
     }
 
     /* ==========================================================================
-       2. MOCK DATA FALLBACK
+       2. MOCK DATA FALLBACK (Schema aligned: physical_brands.id == physical_locations.brand_id)
        ========================================================================== */
     const mockPhysicalStores = [
       {
@@ -693,6 +700,7 @@
         address_en: "G/F, New World Tower, 16-18 Queen's Road Central, Central",
         lat: 22.2815,
         lng: 114.1578,
+        district_id: "CENTRAL_WESTERN",
         opening_hours_zh: "星期一至六: 07:30 - 20:00",
         opening_hours_en: "Mon-Sat: 07:30 - 20:00"
       },
@@ -712,6 +720,7 @@
         address_en: "Shop B215, Times Square, 1 Matheson Street, Causeway Bay",
         lat: 22.2783,
         lng: 114.1822,
+        district_id: "WAN_CHAI",
         opening_hours_zh: "星期一至日: 08:00 - 21:00",
         opening_hours_en: "Mon-Sun: 08:00 - 21:00"
       },
@@ -731,8 +740,29 @@
         address_en: "Shop 108, L1, New Town Plaza Phase 1, Sha Tin",
         lat: 22.3812,
         lng: 114.1889,
+        district_id: "SHA_TIN",
         opening_hours_zh: "星期一至日: 08:00 - 22:00",
         opening_hours_en: "Mon-Sun: 08:00 - 22:00"
+      },
+      {
+        location_id: 1014,
+        brand_id: 1,
+        brand_en: "Pacific Coffee",
+        brand_zh: "太平洋咖啡",
+        category_en: "Food & Beverage",
+        category_zh: "食品與飲料",
+        main_contact: "enquiry@pacificcoffee.com",
+        other_links: "https://www.pacificcoffee.com",
+        discount_details_zh: "出示學生證購買任何手調飲品即享 15% 折扣優惠。\n註：不適用於瓶裝飲料及推廣套餐。",
+        discount_details_en: "15% off handcrafted beverages with valid Student ID.\nNote: Not applicable to bottled drinks or promotional set menus.",
+        phone_number: "2698 1122",
+        address_zh: "沙田大圍港鐵大圍站大堂24號舖",
+        address_en: "Shop 24, Concourse Level, Tai Wai MTR Station, Sha Tin, Tai Wai",
+        lat: 22.3728,
+        lng: 114.1785,
+        district_id: "SHA_TIN",
+        opening_hours_zh: "星期一至日: 07:00 - 21:00",
+        opening_hours_en: "Mon-Sun: 07:00 - 21:00"
       },
       {
         location_id: 102,
@@ -750,6 +780,7 @@
         address_en: "8-10/F, Hysan Place, 500 Hennessy Road, Causeway Bay",
         lat: 22.2799,
         lng: 114.1837,
+        district_id: "WAN_CHAI",
         opening_hours_zh: "星期一至日: 10:00 - 22:00",
         opening_hours_en: "Mon-Sun: 10:00 - 22:00"
       },
@@ -769,6 +800,7 @@
         address_en: "6-12 Sai Yeung Choi Street South, Mong Kok",
         lat: 22.3168,
         lng: 114.1706,
+        district_id: "YAU_TSIM_MONG",
         opening_hours_zh: "星期一至日: 11:30 - 23:30",
         opening_hours_en: "Mon-Sun: 11:30 - 23:30"
       }
@@ -805,38 +837,56 @@
       const brandMap = new Map();
 
       flatLocations.forEach(loc => {
-        const brandId = loc.brand_id || loc.location_id;
+        // Alignment: physical_brands.id == physical_locations.brand_id
+        const brandId = (loc.brand_id !== undefined && loc.brand_id !== null)
+          ? loc.brand_id
+          : ((loc.brandId !== undefined && loc.brandId !== null) ? loc.brandId : loc.id);
+
+        const locationId = (loc.location_id !== undefined && loc.location_id !== null)
+          ? loc.location_id
+          : ((loc.locationId !== undefined && loc.locationId !== null) ? loc.locationId : loc.id);
+
         if (!brandMap.has(brandId)) {
           brandMap.set(brandId, {
             brand_id: brandId,
-            brand_en: loc.brand_en,
-            brand_zh: loc.brand_zh,
+            brand_en: loc.brand_en || loc.brand_name_en || loc.name_en || loc.brand_name,
+            brand_zh: loc.brand_zh || loc.brand_name_zh || loc.name_zh || loc.brand_name,
             category_en: loc.category_en,
             category_zh: loc.category_zh,
-            main_contact: loc.main_contact,
-            other_links: loc.other_links,
+            main_contact: loc.main_contact || loc.contact,
+            other_links: loc.other_links || loc.website || loc.url,
             discount_details_zh: loc.discount_details_zh,
             discount_details_en: loc.discount_details_en,
             branches: []
           });
         }
 
-        brandMap.get(brandId).branches.push({
-          location_id: loc.location_id,
-          phone_number: loc.phone_number,
-          address_zh: loc.address_zh,
-          address_en: loc.address_en,
-          lat: loc.lat,
-          lng: loc.lng,
-          opening_hours_zh: loc.opening_hours_zh,
-          opening_hours_en: loc.opening_hours_en,
-          district_id: loc.district_id,
-          district_en: loc.district_en,
-          district_zh: loc.district_zh,
+        const brandObj = brandMap.get(brandId);
+
+        const branchData = {
+          location_id: locationId,
+          brand_id: brandId,
+          phone_number: loc.phone_number || loc.phone,
+          address_zh: loc.address_zh || loc.address,
+          address_en: loc.address_en || loc.address,
+          lat: parseFloat(loc.lat ?? loc.latitude),
+          lng: parseFloat(loc.lng ?? loc.longitude),
+          opening_hours_zh: loc.opening_hours_zh || loc.opening_hours,
+          opening_hours_en: loc.opening_hours_en || loc.opening_hours,
+          district_id: loc.district_id || loc.districtId || loc.district,
+          district_en: loc.district_en || loc.districtEn,
+          district_zh: loc.district_zh || loc.districtZh,
           district: loc.district,
-          region_en: loc.region_en,
-          region_zh: loc.region_zh
-        });
+          region_en: loc.region_en || loc.regionEn,
+          region_zh: loc.region_zh || loc.regionZh
+        };
+
+        const existingIndex = brandObj.branches.findIndex(b => String(b.location_id) === String(locationId));
+        if (existingIndex > -1) {
+          brandObj.branches[existingIndex] = branchData;
+        } else {
+          brandObj.branches.push(branchData);
+        }
       });
 
       return Array.from(brandMap.values());
@@ -850,7 +900,6 @@
     let districtBoundaryLayer = null;
 
     async function loadDistrictBoundariesGeoJSON() {
-      // Priority list of GitHub / standard HAD GeoJSON endpoints for hksar_18_district_boundary.json
       const geojsonSources = [
         'hksar_18_district_boundary.json',
         './hksar_18_district_boundary.json',
@@ -890,7 +939,6 @@
         const props = feature.properties || {};
         const strProps = JSON.stringify(props).toLowerCase();
         
-        // Match English name, Chinese name, or key district keywords
         const zhMatch = targetDist.zh && strProps.includes(targetDist.zh.toLowerCase());
         const enMatch = targetDist.en && strProps.includes(targetDist.en.toLowerCase().replace('&', 'and'));
         const kwMatch = targetDist.keywords && targetDist.keywords.some(kw => strProps.includes(kw.toLowerCase()));
@@ -944,7 +992,7 @@
         districtBoundaryLayer = null;
       }
 
-      // Render accurate GeoJSON boundary polygon if district filter is active
+      // Render GeoJSON boundary polygon if district filter is active
       if (state.selectedDistrict !== 'ALL') {
         let matchedFeature = null;
 
@@ -962,24 +1010,27 @@
               fillOpacity: 0.22
             }
           }).addTo(mapInstance);
-
-          mapInstance.fitBounds(districtBoundaryLayer.getBounds(), { padding: [30, 30] });
         }
       }
 
       const isZh = state.lang === 'zh';
 
       locations.forEach(loc => {
-        if (!loc.lat || !loc.lng) return;
+        const lat = parseFloat(loc.lat ?? loc.latitude);
+        const lng = parseFloat(loc.lng ?? loc.longitude);
+        if (isNaN(lat) || isNaN(lng)) return;
 
         const catConfig = getCategoryConfig(loc.category_en, loc.category_zh);
-        const brandName = isZh ? loc.brand_zh : loc.brand_en;
-        const address = processLinebreaks(isZh ? loc.address_zh : loc.address_en);
-        const discount = processLinebreaks(isZh ? loc.discount_details_zh : loc.discount_details_en);
+        const brandName = isZh ? (loc.brand_zh || loc.brand_en) : (loc.brand_en || loc.brand_zh);
+        const address = processLinebreaks(isZh ? (loc.address_zh || loc.address_en) : (loc.address_en || loc.address_zh));
+        const discount = processLinebreaks(isZh ? (loc.discount_details_zh || loc.discount_details_en) : (loc.discount_details_en || loc.discount_details_zh));
         const categoryLabel = isZh ? catConfig.zh : catConfig.en;
 
         const customIcon = createCategoryMarkerIcon(catConfig);
-        const marker = L.marker([loc.lat, loc.lng], { icon: customIcon }).addTo(mapInstance);
+        const marker = L.marker([lat, lng], { icon: customIcon }).addTo(mapInstance);
+
+        const brandId = (loc.brand_id !== undefined && loc.brand_id !== null) ? loc.brand_id : loc.id;
+        const locationId = (loc.location_id !== undefined && loc.location_id !== null) ? loc.location_id : loc.id;
 
         const popupHTML = `
           <div class="p-3">
@@ -990,7 +1041,7 @@
             <h4 class="font-extrabold text-slate-800 text-sm leading-tight mb-1">${brandName}</h4>
             <p class="text-xs text-slate-500 mb-2 whitespace-pre-line line-clamp-2"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i>${address}</p>
             <div class="bg-amber-50 border border-amber-200 text-amber-900 text-xs p-2 rounded-lg font-medium mb-3 whitespace-pre-line leading-relaxed">${discount}</div>
-            <button onclick="openModalByBrandId(${loc.brand_id}, ${loc.location_id})" class="w-full py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg transition shadow-sm">
+            <button onclick="openModalByBrandId(${brandId}, ${locationId})" class="w-full py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg transition shadow-sm">
               ${i18n[state.lang].viewDetails}
             </button>
           </div>
@@ -999,6 +1050,19 @@
         marker.bindPopup(popupHTML);
         mapMarkers.push(marker);
       });
+
+      // Fit map viewport dynamically to encompass all rendered markers and district bounds
+      if (mapMarkers.length > 0) {
+        const markerGroup = L.featureGroup(mapMarkers);
+        if (districtBoundaryLayer) {
+          const combinedBounds = markerGroup.getBounds().extend(districtBoundaryLayer.getBounds());
+          mapInstance.fitBounds(combinedBounds, { padding: [40, 40], maxZoom: 15 });
+        } else {
+          mapInstance.fitBounds(markerGroup.getBounds(), { padding: [40, 40], maxZoom: 15 });
+        }
+      } else if (districtBoundaryLayer) {
+        mapInstance.fitBounds(districtBoundaryLayer.getBounds(), { padding: [30, 30] });
+      }
     }
 
     /* ==========================================================================
@@ -1052,7 +1116,7 @@
             if (!isBranchInDistrict(loc, state.selectedDistrict)) return false;
           }
           if (state.favoritesOnly) {
-            const key = `physical_${loc.brand_id}`;
+            const key = `physical_${loc.brand_id || loc.id}`;
             if (!state.favorites.includes(key)) return false;
           }
           if (q) {
