@@ -434,7 +434,7 @@
         regionEn: 'New Territories & Islands', regionZh: '新界及離島',
         districts: [
           { id: 'KWAI_TSING', en: 'Kwai Tsing', zh: '葵青區', keywords: ['kwai tsing', 'kwai_tsing', 'kwai chung', 'tsing yi', 'kwai fong', '葵青', '葵涌', '青衣', '葵芳'] },
-          { id: 'TSUEN_WAN', en: 'Tsuen Wan', zh: '荃灣區', keywords: ['tsuen wan', 'tsuenwan', 'tsuen_wan', 'sham tseng', '荃灣', '深井'] },
+          { id: 'TSUEN_WAN', en: 'Tsuen Wan', zh: '荃灣區', keywords: ['tsuen wan', 'tsuenwan', 'tsuen_wan', 'chai wan kok', 'chai wan kok road', 'chai wan kok street', 'sham tseng', '荃灣', '深井', '柴灣角', '柴灣角街', '柴灣角路'] },
           { id: 'TUEN_MUN', en: 'Tuen Mun', zh: '屯門區', keywords: ['tuen mun', 'tuenmun', 'tuen_mun', '屯門'] },
           { id: 'YUEN_LONG', en: 'Yuen Long', zh: '元朗區', keywords: ['yuen long', 'yuenlong', 'yuen_long', 'tin shui wai', '元朗', '天水圍'] },
           { id: 'NORTH', en: 'North', zh: '北區', keywords: ['north', 'sheung shui', 'fanling', '北區', '上水', '粉嶺'] },
@@ -465,6 +465,7 @@
       'kowloon bay': '九龍灣',
       'tseung kwan o': '將軍澳',
       'tsuen wan': '荃灣',
+      'chai wan kok': '柴灣角',
       'north point': '北角',
       'quarry bay': '鰂魚涌',
       'sham shui po': '深水埗',
@@ -531,8 +532,12 @@
       const parts = addressEn.split(',');
       for (let i = parts.length - 1; i >= 0; i--) {
         const cleanPart = parts[i].trim().toLowerCase();
-        if (LOCATION_TRANSLATIONS[cleanPart]) {
-          return LOCATION_TRANSLATIONS[cleanPart];
+        for (const key in LOCATION_TRANSLATIONS) {
+          if (cleanPart.includes(key)) {
+            // Guard against "chai wan" substring matching inside "chai wan kok"
+            if (key === 'chai wan' && cleanPart.includes('chai wan kok')) continue;
+            return LOCATION_TRANSLATIONS[key];
+          }
         }
       }
       return '';
@@ -666,10 +671,10 @@
 
     function extractAreaName(addressEn, addressZh, isZh) {
       const rawEn = addressEn || '';
-      const textEn = rawEn.toLowerCase();
       const textZh = addressZh || '';
 
       const AREAS = [
+        { en: 'Chai Wan Kok', zh: '柴灣角' },
         { en: 'Kwai Chung', zh: '葵涌' },
         { en: 'Kwun Tong', zh: '觀塘' },
         { en: 'Mong Kok', zh: '旺角' },
@@ -700,12 +705,34 @@
         { en: 'Admiralty', zh: '金鐘' },
         { en: 'Hung Hom', zh: '紅磡' },
         { en: 'Yau Ma Tei', zh: '油麻地' },
-        { en: 'Prince Edward', zh: '太子' }
+        { en: 'Prince Edward', zh: '太子' },
+        { en: 'Chai Wan', zh: '柴灣' }
       ];
 
-      for (const area of AREAS) {
-        if (textZh.includes(area.zh) || textEn.includes(area.en.toLowerCase())) {
-          return isZh ? area.zh : area.en;
+      // Evaluate from the final general location segment first (right-to-left)
+      if (!isZh && rawEn) {
+        const partsEn = rawEn.split(',').map(s => s.trim()).filter(Boolean);
+        for (let i = partsEn.length - 1; i >= 0; i--) {
+          const partLower = partsEn[i].toLowerCase();
+          for (const area of AREAS) {
+            if (partLower.includes(area.en.toLowerCase())) {
+              if (area.en === 'Chai Wan' && partLower.includes('chai wan kok')) continue;
+              return area.en;
+            }
+          }
+        }
+      }
+
+      if (isZh && textZh) {
+        const partsZh = textZh.split(',').map(s => s.trim()).filter(Boolean);
+        for (let i = partsZh.length - 1; i >= 0; i--) {
+          const part = partsZh[i];
+          for (const area of AREAS) {
+            if (part.includes(area.zh)) {
+              if (area.zh === '柴灣' && part.includes('柴灣角')) continue;
+              return area.zh;
+            }
+          }
         }
       }
 
@@ -742,59 +769,88 @@
       return null;
     }
 
-    // Precise District Filtering function fixing multi-branch map cross-contamination
+    /**
+     * Determines a branch's district by evaluating explicit district fields first,
+     * then parsing address components from right to left (final general location first).
+     * This prevents false positives like "Chai Wan Kok Road" in Tsuen Wan matching "Chai Wan" in Eastern District.
+     */
+    function getBranchDistrictId(branch) {
+      // 1. Explicit district ID on branch object
+      const rawDist = branch.district_id || branch.districtId || branch.district;
+      const normalized = getNormalizedDistrictId(rawDist);
+      if (normalized) return normalized;
+
+      // 2. Explicit district text metadata fields
+      if (branch.district_en || branch.districtEn) {
+        const normEn = getNormalizedDistrictId(branch.district_en || branch.districtEn);
+        if (normEn) return normEn;
+      }
+      if (branch.district_zh || branch.districtZh) {
+        const normZh = getNormalizedDistrictId(branch.district_zh || branch.districtZh);
+        if (normZh) return normZh;
+      }
+
+      // 3. Final General Location Parsing (evaluate address components right-to-left)
+      const addressEn = branch.address_en || branch.address || '';
+      const addressZh = branch.address_zh || branch.address || '';
+
+      // Evaluate English address from right to left (last comma-separated part first)
+      if (addressEn) {
+        const partsEn = addressEn.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+        for (let i = partsEn.length - 1; i >= 0; i--) {
+          const part = partsEn[i];
+          for (const reg of HK_DISTRICTS) {
+            for (const dist of reg.districts) {
+              if (part === dist.en.toLowerCase() || part === dist.zh.toLowerCase()) {
+                return dist.id;
+              }
+              for (const kw of dist.keywords) {
+                const kwLower = kw.toLowerCase();
+                if (part.includes(kwLower)) {
+                  // Guard against false positive "chai wan" substring inside "chai wan kok"
+                  if (kwLower === 'chai wan' && part.includes('chai wan kok')) continue;
+                  return dist.id;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Evaluate Chinese address from right to left
+      if (addressZh) {
+        const partsZh = addressZh.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+        for (let i = partsZh.length - 1; i >= 0; i--) {
+          const part = partsZh[i];
+          for (const reg of HK_DISTRICTS) {
+            for (const dist of reg.districts) {
+              if (part.includes(dist.zh.toLowerCase())) {
+                if (dist.id === 'EASTERN' && part.includes('柴灣角')) continue;
+                return dist.id;
+              }
+              for (const kw of dist.keywords) {
+                const kwLower = kw.toLowerCase();
+                if (part.includes(kwLower)) {
+                  if (kwLower === '柴灣' && part.includes('柴灣角')) continue;
+                  if (kwLower === 'chai wan' && part.includes('chai wan kok')) continue;
+                  return dist.id;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return null;
+    }
+
+    // Precise District Filtering function
     function isBranchInDistrict(branch, districtId) {
       if (!districtId || districtId === 'ALL') return true;
 
-      let targetDist = null;
-      for (const reg of HK_DISTRICTS) {
-        const found = reg.districts.find(d => d.id === districtId);
-        if (found) { targetDist = found; break; }
-      }
-
-      if (!targetDist) return true;
-
-      // Check explicit district ID field on branch
-      const rawBranchDist = branch.district_id || branch.districtId || branch.district;
-      const branchDistId = getNormalizedDistrictId(rawBranchDist);
-
-      // CRITICAL FIX: If branch explicitly defines a district ID, perform strict exact comparison
-      if (branchDistId) {
-        return branchDistId === targetDist.id;
-      }
-
-      // Check English/Chinese district metadata if explicit ID is unmapped
-      if (branch.district_en || branch.districtEn) {
-        const enVal = String(branch.district_en || branch.districtEn).trim().toLowerCase();
-        if (enVal === targetDist.en.toLowerCase()) return true;
-      }
-      if (branch.district_zh || branch.districtZh) {
-        const zhVal = String(branch.district_zh || branch.districtZh).trim().toLowerCase();
-        if (zhVal === targetDist.zh.toLowerCase()) return true;
-      }
-
-      // Fallback address text keyword matching (only when no district ID is provided)
-      const addressText = [
-        branch.address_en,
-        branch.address_zh,
-        branch.location_name,
-        branch.name
-      ].filter(Boolean).join(' ').toLowerCase();
-
-      // Check Chinese district name
-      if (addressText.includes(targetDist.zh.toLowerCase())) {
-        return true;
-      }
-
-      // Check specific keywords while ignoring loose sub-words that cause false positives across districts
-      for (const kw of targetDist.keywords) {
-        const kwLower = kw.toLowerCase();
-        if (['north', 'southern', 'eastern', 'central', 'south', 'east'].includes(kwLower)) {
-          continue; // Prevent loose word matching like "Central Plaza" in Wan Chai
-        }
-        if (addressText.includes(kwLower)) {
-          return true;
-        }
+      const detectedDistId = getBranchDistrictId(branch);
+      if (detectedDistId) {
+        return detectedDistId === districtId;
       }
 
       return false;
